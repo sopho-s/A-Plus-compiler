@@ -1,0 +1,7 @@
+dir:
+print:print.aph:file 
+print:print.asm:file
+buildtype:  
+print:assembly:static
+externalassemblyrequirements:
+print:_printf, stdcall

@@ -1,0 +1,1 @@
+make function finder work, so seperate functions compile seperately, make it so functions can also be called

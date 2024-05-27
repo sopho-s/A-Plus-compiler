@@ -1,0 +1,5 @@
+dir:
+-std:folder
+buildtype (importname:codetype:linktype):
+aprequirements:
+externalassemblyrequirements:

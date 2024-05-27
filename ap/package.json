@@ -1,0 +1,36 @@
+{
+  "name": "ap",
+  "displayName": "ap",
+  "description": "a plus Programming language",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.89.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "ap",
+      "aliases": ["a plus", "ap"],
+      "icons" : {
+        "light": "./fileicons/ap.png",
+        "dark": "./fileicons/ap.png"
+      },
+      "extensions": [".ap"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "ap",
+      "scopeName": "source.ap",
+      "path": "./syntaxes/ap.tmLanguage.json"
+    }],
+    "iconThemes": [
+      {
+        "id": "ap",
+        "label": "a plus",
+        "path": "fileicons/aplus-icon-theme.json"
+      }
+    ]
+  }
+}

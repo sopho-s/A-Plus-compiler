@@ -1,0 +1,7 @@
+build/
+log/
+.vscode/
+.vs/
+*.ap
+*.asm
+*.exe

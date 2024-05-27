@@ -1,0 +1,106 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "autisticprogram",
+	"patterns": [
+		{
+			"include": "#comments"
+		},
+		{
+			"include": "#functionparampass"
+		},
+		{
+			"include": "#operators"
+		},
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#strings"
+		},
+		{
+			"include": "#includes"
+		}
+	],
+	"repository": {
+		"functionparampass" : {
+			"patterns": [{
+				"name": "keyword.parameterpass.ap",
+				"match": "<<<"
+			}]
+		},
+		"keywords": {
+			"patterns": [{
+				"name": "keyword.control.ap",
+				"match": "\\b(if|while|for|return)\\b"
+			},
+			{
+				"name": "keyword.identifier.ap",
+				"match": "\\b(int|string|bool|float|const)\\b"
+			},
+			{
+				"name": "keyword.functiondefiner.ap",
+				"match": "func"
+			}, 
+			{
+			"name": "keyword.functionname.ap",
+			"match": "(?<=func\\s+)\\w*"
+			},
+			{
+			"name": "keyword.include.ap",
+			"match": "#include"
+			}]
+		},
+		"includes": {
+			"patterns": [{
+				"name": "includes.includefile.ap",
+				"match": "(?<=#include )[^ |\\n]*"
+			}]
+		},
+		"strings": {
+			"name": "string.quoted.double.ap",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.ap",
+					"match": "\\\\."
+				}
+			]
+		},
+		"comments": {
+			"patterns": [
+			{
+				"name": "comment.line.ap",
+				"begin": "//",
+				"end": "\n"
+			},
+			{
+				"begin" : "/\\*",
+				"end" : "\\*/",
+				"name" : "comment.multiline.ap"
+			}
+			]
+		},
+		"operators": {
+			"patterns": [
+			{
+				"name": "operator.arithmetic.ap",
+				"match": "\\+"
+			},
+			{
+				"name": "operator.arithmetic.ap",
+				"match": "\\-"
+			},
+			{
+				"name": "operator.arithmetic.ap",
+				"match": "\\*"
+			},
+			{
+				"name": "operator.assignment.ap",
+				"match": "\\="
+			}
+			]
+		}
+	},
+	"scopeName": "source.ap"
+}
