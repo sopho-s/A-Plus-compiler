@@ -1,6 +1,15 @@
 # AP syntax
 
-## Expresions
+## Comments
+
+```
+//  Single line comment
+/*  Multi
+    Line
+    Comment */
+```
+
+## Expressions
 
 All basic expressions should end in a semi colon
 
@@ -29,6 +38,16 @@ float othervalue = 1.0 + 4.0 * 3.0 / 4.0 - 4.0;
 ```
 
 ## Functions
+
+### Main function
+
+Each program must have a main function, this function cannot be referenced
+
+```
+func main() () {
+    // Do stuff
+}
+```
 
 ### Creating a function
 
