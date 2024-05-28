@@ -97,6 +97,7 @@ func main() {
 	var df definedfunctions
 	df.functions = make(map[string]nodefunction)
 	floatcountmap := make(map[string]int)
+	JMPlabel := 0
 	for _, function := range functions {
 		function.RemoveStartAndEnd()
 		nodes = function.nodes
@@ -110,6 +111,16 @@ func main() {
 		}
 		nodes, shouldcontinue, compilationlog = SyntaxAnalysis(nodes, compilationlog, nosyntax, vl, df)
 		compilationlog.AddLog("Syntax analysis finished", 0)
+
+		compilationlog.AddLog("Seperating sections", 0)
+		if verbose {
+			fmt.Println("Seperating sections")
+		}
+		nodes := SeperateSections(nodes, &JMPlabel, &compilationlog)
+		compilationlog.AddLog("Sections seperated", 0)
+		if verbose {
+			fmt.Println("Sections seperated")
+		}
 		if verbose {
 			fmt.Println("Syntax analysis finished")
 		}
@@ -148,7 +159,7 @@ func main() {
 			fmt.Println("Making intermediate code for \"" + function.name + "\"")
 		}
 		for _, node := range AST.children {
-			newcode, _ := MakeIntermediate(node)
+			newcode, _ := MakeIntermediate(node, &JMPlabel)
 			outcode.AddCode(newcode)
 		}
 		compilationlog.AddLog("Intermediate code created", 0)

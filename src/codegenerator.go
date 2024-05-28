@@ -80,6 +80,14 @@ func ConvertToNASM(intcode string, funcname string, floatcountmap *map[string]in
 				stackcount++
 			}
 			break
+		case "JNE":
+			outcode.AddStringCode(linesplit[1] + " " + linesplit[2])
+			log[index-startindex].assemblycode.AddStringCode(linesplit[1] + " " + linesplit[2])
+			break
+		case "LABEL":
+			outcode.AddStringCode(linesplit[2] + ":")
+			log[index-startindex].assemblycode.AddStringCode(linesplit[2] + ":")
+			break
 		case "PUSH":
 			if string(linesplit[2][0]) == "I" {
 				outcode.AddStringCode("MOV [ESP + " + strconv.FormatInt(int64(stackcount)*4, 10) + "], " + registers[linesplit[2]])
@@ -102,9 +110,25 @@ func ConvertToNASM(intcode string, funcname string, floatcountmap *map[string]in
 				log[index-startindex].assemblycode.AddStringCode("MOVSS " + registers[linesplit[2]] + ", DWORD [ESP + " + strconv.FormatInt(int64(stackcount)*4, 10) + "]")
 			}
 			break
-		case "CMP":
-			outcode.AddStringCode("CMP " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
-			log[index-startindex].assemblycode.AddStringCode("CMP " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
+		case "ICMP":
+			_, isin := registers[linesplit[3]]
+			if isin {
+				outcode.AddStringCode("CMP " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
+				log[index-startindex].assemblycode.AddStringCode("CMP " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
+			} else {
+				outcode.AddStringCode("CMP " + registers[linesplit[2]] + ", " + linesplit[3])
+				log[index-startindex].assemblycode.AddStringCode("CMP " + registers[linesplit[2]] + ", " + linesplit[3])
+			}
+			break
+		case "FCMP":
+			_, isin := registers[linesplit[3]]
+			if isin {
+				outcode.AddStringCode("UCOMISS " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
+				log[index-startindex].assemblycode.AddStringCode("UCOMISS " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
+			} else {
+				outcode.AddStringCode("UCOMISS " + registers[linesplit[2]] + ", " + linesplit[3])
+				log[index-startindex].assemblycode.AddStringCode("UCOMISS " + registers[linesplit[2]] + ", " + linesplit[3])
+			}
 			break
 		case "CMOVE":
 			outcode.AddStringCode("CMOVE " + registers[linesplit[2]] + ", " + registers[linesplit[3]])

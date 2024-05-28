@@ -85,6 +85,40 @@ func SeperateFunctions(nodes []node, bl *buildlog) ([]nodefunction, bool) {
 	return functionlist, true
 }
 
+func SeperateSections(nodes []node, JMPlabel *int, bl *buildlog) []node {
+	index := 0
+	returnnodes := make([]node, 0)
+	lastconditionindex := 0
+	isgettingsection := false
+	for {
+		if index == len(nodes) {
+			break
+		}
+		if !isgettingsection && nodes[index].token == IF {
+			isgettingsection = true
+			lastconditionindex = index
+			index++
+		} else if isgettingsection && nodes[index].token != OPENCBRACKET {
+			nodes[lastconditionindex].condition = append(nodes[lastconditionindex].condition, nodes[index])
+			index++
+		} else if isgettingsection {
+			isgettingsection = false
+			tempnodes := nodes[lastconditionindex].condition
+			outqueue := MakePostfix(tempnodes)
+			AST := ConvertPostfix(outqueue).children[0]
+			newcode, _ := MakeIntermediate(AST, JMPlabel)
+			nodes[lastconditionindex].conditionintcode = &newcode
+			returnnodes = append(returnnodes, nodes[lastconditionindex])
+			returnnodes = append(returnnodes, nodes[index])
+			index++
+		} else {
+			returnnodes = append(returnnodes, nodes[index])
+			index++
+		}
+	}
+	return returnnodes
+}
+
 func SyntaxAnalysis(nodes []node, bl buildlog, noerror bool, predefinedvar variablelist, predefinedfunctions definedfunctions) ([]node, bool, buildlog) {
 	returnval := true
 	shouldcontinue := CheckBrackets(nodes, &bl, noerror)

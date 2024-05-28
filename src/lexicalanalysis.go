@@ -204,6 +204,8 @@ func (l *lexer) Lex() (position, token, string) {
 					return startPos, BOOL, lit
 				case "false":
 					return startPos, BOOL, lit
+				case "if":
+					return startPos, IF, lit
 				default:
 					return startPos, IDENT, lit
 				}

@@ -21,18 +21,20 @@ func (b *buf) Write(p []byte) (n int, err error) {
 func (b *buf) String() string { return string(*b) }
 
 type node struct {
-	id            int
-	token         token
-	value         string
-	size          int
-	children      []*node
-	isvariable    bool
-	variable      variable
-	linenumber    int
-	columnnumber  int
-	isloop        bool
-	looptype      int
-	isbeingcalled bool
+	id               int
+	token            token
+	value            string
+	size             int
+	children         []*node
+	childrencount    int
+	variable         variable
+	linenumber       int
+	columnnumber     int
+	isloop           bool
+	looptype         int
+	isbeingcalled    bool
+	condition        []node
+	conditionintcode *code
 }
 
 type nodefunction struct {

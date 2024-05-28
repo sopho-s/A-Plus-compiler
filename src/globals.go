@@ -37,6 +37,8 @@ const (
 	PIPEIN
 
 	INCLUDE
+
+	IF
 )
 
 const (
@@ -112,6 +114,8 @@ var tokens = []string{
 	PIPEIN: "<<<",
 
 	INCLUDE: "INCLUDE",
+
+	IF: "IF",
 }
 
 var precedence = map[int]int{

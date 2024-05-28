@@ -22,6 +22,20 @@ func MakePostfix(nodes []node) section {
 			}
 			out.lines = append(out.lines, output)
 			output.Clear()
+		} else if value.token == OPENCBRACKET {
+			for !offstack.IsEmpty() {
+				if !(offstack.Peek().token == OPENBRACKET) || !(offstack.Peek().token == CLOSEBRACKET) {
+					output.Enqueue(offstack.Pop())
+				} else {
+					_ = offstack.Pop()
+				}
+			}
+			out.lines = append(out.lines, output)
+			output.Clear()
+		} else if value.token == CLOSECBRACKET {
+			output.Enqueue(value)
+			out.lines = append(out.lines, output)
+			output.Clear()
 		} else if offstack.IsEmpty() {
 			value.id = il.GetId()
 			offstack.Push(value)
@@ -67,16 +81,25 @@ func MakePostfix(nodes []node) section {
 			}
 		}
 	}
+	if len(out.lines) == 0 {
+		out.lines = append(out.lines, output)
+		output.Clear()
+	}
 	return out
 }
 
 func ConvertPostfix(postfixcode section) node {
 	var sectionnode node
+	var tempnodestack stack
+	var sectionnodestack stack
+	isinsection := false
 	for _, line := range postfixcode.lines {
 		var nodestack stack
 		for !line.IsEmpty() {
 			currnode := line.Dequeue()
 			if currnode.token == IDENT || currnode.token == INT || currnode.token == FLOAT || currnode.token == BOOL || currnode.token == FUNC {
+				nodestack.Push(currnode)
+			} else if currnode.token == IF {
 				nodestack.Push(currnode)
 			} else {
 				var left node
@@ -88,8 +111,37 @@ func ConvertPostfix(postfixcode section) node {
 				nodestack.Push(currnode)
 			}
 		}
-		tempnode := nodestack.Pop()
-		sectionnode.LinkNode(&tempnode)
+		if !isinsection && nodestack.Peek().token != IF {
+			tempnode := nodestack.Pop()
+			sectionnode.LinkNode(&tempnode)
+		} else {
+			currnode := nodestack.Pop()
+			if currnode.token == IF {
+				sectionnodestack.Push(currnode)
+				var openbrac node
+				openbrac.token = OPENCBRACKET
+				tempnodestack.Push(openbrac)
+			}
+			isinsection = true
+			if currnode.token == CLOSECBRACKET {
+				sectionno := sectionnodestack.Pop()
+				for {
+					tempnode := tempnodestack.Pop()
+					if tempnode.token == OPENCBRACKET {
+						tempnodestack.Push(sectionno)
+						break
+					} else if tempnode.token != CLOSECBRACKET {
+						sectionno.LinkNode(&tempnode)
+					}
+				}
+			}
+			if sectionnodestack.IsEmpty() {
+				tempnode := tempnodestack.Pop()
+				sectionnode.LinkNode(&tempnode)
+			} else if currnode.token != IF {
+				tempnodestack.Push(currnode)
+			}
+		}
 	}
 	return sectionnode
 }
