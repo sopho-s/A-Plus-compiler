@@ -115,12 +115,14 @@ func (il *idlist) GetId() int {
 }
 
 func (c *code) AddCode(val code) {
-	if c.linecount > 0 {
-		c.store += "\n" + val.store
-	} else {
-		c.store = val.store
+	if val.store != "" {
+		if c.linecount > 0 {
+			c.store += "\n" + val.store
+		} else {
+			c.store = val.store
+		}
+		c.linecount += val.linecount
 	}
-	c.linecount += val.linecount
 }
 
 func (c *code) AddStringCode(val string) {

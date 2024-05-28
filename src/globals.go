@@ -137,9 +137,9 @@ var precedence = map[int]int{
 	GREATEROREQUAL: 3,
 	LESS:           3,
 	LESSOREQUAL:    3,
-	PIPEIN:         3,
 	ADD:            4,
 	SUB:            4,
 	IMUL:           4,
 	IDIV:           5,
+	PIPEIN:         6,
 }

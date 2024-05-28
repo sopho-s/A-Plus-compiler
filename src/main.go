@@ -100,6 +100,7 @@ func main() {
 	JMPlabel := 0
 	for _, function := range functions {
 		function.RemoveStartAndEnd()
+		df.AddFunction(function)
 		nodes = function.nodes
 		var vl variablelist
 		for _, vari := range function.parameters {
@@ -196,7 +197,6 @@ func main() {
 			f.WriteString("\n\n\n")
 		}
 		funccode.AddCode(writecode)
-		df.AddFunction(function)
 	}
 	f, _ := os.Create("build/build.asm")
 	compilationlog.AddLog("", 0)

@@ -80,6 +80,10 @@ func ConvertToNASM(intcode string, funcname string, floatcountmap *map[string]in
 				stackcount++
 			}
 			break
+		case "RET":
+			outcode.AddStringCode("RET")
+			log[index-startindex].assemblycode.AddStringCode("RET")
+			break
 		case "JNE":
 			outcode.AddStringCode(linesplit[1] + " " + linesplit[2])
 			log[index-startindex].assemblycode.AddStringCode(linesplit[1] + " " + linesplit[2])

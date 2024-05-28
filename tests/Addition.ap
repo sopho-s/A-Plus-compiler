@@ -1,0 +1,8 @@
+func main() () {
+    int a = 1;
+    int b = 2;
+    int c = a + b; // 3
+    float af = 1.0;
+    float bf = 2.0;
+    float cf = af + bf; // 3.0
+}
