@@ -108,7 +108,7 @@ func (l *lexer) Lex() (position, token, string) {
 			default:
 				l.pos.column--
 				l.Backup()
-				return l.pos, ASSIGN, "="
+				return l.pos, GREATER, ">"
 			}
 		case '!':
 			l.pos.column++
@@ -131,14 +131,23 @@ func (l *lexer) Lex() (position, token, string) {
 			return l.pos, OPENCBRACKET, "{"
 		case '}':
 			return l.pos, CLOSECBRACKET, "}"
+		case '|':
+			return l.pos, OR, "|"
+		case '&':
+			return l.pos, AND, "&"
 		case ',':
 			return l.pos, COMMA, ","
 		case '<':
 			l.pos.column++
 			r, _, err = l.reader.ReadRune()
-			if r != '<' {
+			if r != '<' && r != '=' {
 				l.pos.column--
 				l.Backup()
+				return l.pos, LESS, "<"
+			} else if r == '=' {
+				l.pos.column--
+				l.Backup()
+				return l.pos, LESSOREQUAL, "<="
 			}
 			l.pos.column++
 			r, _, err = l.reader.ReadRune()

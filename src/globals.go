@@ -22,6 +22,8 @@ const (
 	SUB
 	IMUL
 	IDIV
+	AND
+	OR
 
 	// comparisons
 	ISEQUAL
@@ -100,6 +102,8 @@ var tokens = []string{
 	SUB:  "-",
 	IMUL: "*",
 	IDIV: "/",
+	AND:  "&",
+	OR:   "|",
 
 	ISEQUAL:        "==",
 	ISNOTEQUAL:     "!=",
@@ -125,15 +129,17 @@ var precedence = map[int]int{
 	CLOSEBRACKET:   -1,
 	RETURN:         0,
 	ASSIGN:         0,
-	ISEQUAL:        1,
-	ISNOTEQUAL:     1,
-	GREATER:        1,
-	GREATEROREQUAL: 1,
-	LESS:           1,
-	LESSOREQUAL:    1,
-	PIPEIN:         1,
-	ADD:            2,
-	SUB:            2,
-	IMUL:           3,
-	IDIV:           3,
+	OR:             1,
+	AND:            2,
+	ISEQUAL:        3,
+	ISNOTEQUAL:     3,
+	GREATER:        3,
+	GREATEROREQUAL: 3,
+	LESS:           3,
+	LESSOREQUAL:    3,
+	PIPEIN:         3,
+	ADD:            4,
+	SUB:            4,
+	IMUL:           4,
+	IDIV:           5,
 }

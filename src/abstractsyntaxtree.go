@@ -82,6 +82,13 @@ func MakePostfix(nodes []node) section {
 		}
 	}
 	if len(out.lines) == 0 {
+		for !offstack.IsEmpty() {
+			if !(offstack.Peek().token == OPENBRACKET) || !(offstack.Peek().token == CLOSEBRACKET) {
+				output.Enqueue(offstack.Pop())
+			} else {
+				_ = offstack.Pop()
+			}
+		}
 		out.lines = append(out.lines, output)
 		output.Clear()
 	}

@@ -84,6 +84,14 @@ func ConvertToNASM(intcode string, funcname string, floatcountmap *map[string]in
 			outcode.AddStringCode(linesplit[1] + " " + linesplit[2])
 			log[index-startindex].assemblycode.AddStringCode(linesplit[1] + " " + linesplit[2])
 			break
+		case "AND":
+			outcode.AddStringCode("AND " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
+			log[index-startindex].assemblycode.AddStringCode("AND " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
+			break
+		case "OR":
+			outcode.AddStringCode("OR " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
+			log[index-startindex].assemblycode.AddStringCode("OR " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
+			break
 		case "LABEL":
 			outcode.AddStringCode(linesplit[2] + ":")
 			log[index-startindex].assemblycode.AddStringCode(linesplit[2] + ":")
@@ -138,6 +146,22 @@ func ConvertToNASM(intcode string, funcname string, floatcountmap *map[string]in
 			outcode.AddStringCode("CMOVNE " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
 			log[index-startindex].assemblycode.AddStringCode("CMOVNE " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
 			break
+		case "CMOVL":
+			outcode.AddStringCode("CMOVL " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
+			log[index-startindex].assemblycode.AddStringCode("CMOVL " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
+			break
+		case "CMOVG":
+			outcode.AddStringCode("CMOVG " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
+			log[index-startindex].assemblycode.AddStringCode("CMOVG " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
+			break
+		case "CMOVLE":
+			outcode.AddStringCode("CMOVLE " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
+			log[index-startindex].assemblycode.AddStringCode("CMOVLE " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
+			break
+		case "CMOVGE":
+			outcode.AddStringCode("CMOVGE " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
+			log[index-startindex].assemblycode.AddStringCode("CMOVGE " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
+			break
 		case "IADD":
 			outcode.AddStringCode("ADD " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
 			log[index-startindex].assemblycode.AddStringCode("ADD " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
@@ -165,7 +189,7 @@ func ConvertToNASM(intcode string, funcname string, floatcountmap *map[string]in
 			_, isreg := registers[linesplit[3]]
 			if isreg {
 				outcode.AddStringCode("MOV " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
-				log[index-1-startindex].assemblycode.AddStringCode("MOV " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
+				log[index-startindex].assemblycode.AddStringCode("MOV " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
 			} else {
 				if len(linesplit) == 5 {
 					val, _ := offsetmap[linesplit[3]]

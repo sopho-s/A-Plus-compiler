@@ -58,11 +58,31 @@ func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
 		}
 		var tempcode code
 		tempcode.AddCode(*AST.conditionintcode)
-		tempcode.AddStringCode(strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " CMP IR1 1\n" + strconv.Itoa(AST.linenumber) + " JNE if" + strconv.Itoa(*JMPlabel))
+		tempcode.AddStringCode(strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " ICMP IR1 1\n" + strconv.Itoa(AST.linenumber) + " JNE if" + strconv.Itoa(*JMPlabel))
 		tempcode.AddCode(body)
 		tempcode.AddStringCode(strconv.Itoa(AST.linenumber) + " LABEL if" + strconv.Itoa(*JMPlabel))
 		returncode.AddCode(tempcode)
 		return returncode, VOID
+	case AND:
+		leftcode, lefttype := MakeIntermediate(AST.children[0], JMPlabel)
+		rightcode, _ := MakeIntermediate(AST.children[1], JMPlabel)
+		var tempcode code
+		tempcode.linecount = 4
+		tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " AND IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " PUSH IR2"
+		leftcode.AddCode(rightcode)
+		leftcode.AddCode(tempcode)
+		returncode.AddCode(leftcode)
+		return returncode, lefttype
+	case OR:
+		leftcode, lefttype := MakeIntermediate(AST.children[0], JMPlabel)
+		rightcode, _ := MakeIntermediate(AST.children[1], JMPlabel)
+		var tempcode code
+		tempcode.linecount = 4
+		tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " OR IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " PUSH IR2"
+		leftcode.AddCode(rightcode)
+		leftcode.AddCode(tempcode)
+		returncode.AddCode(leftcode)
+		return returncode, lefttype
 	case ADD:
 		leftcode, lefttype := MakeIntermediate(AST.children[0], JMPlabel)
 		rightcode, righttype := MakeIntermediate(AST.children[1], JMPlabel)
@@ -149,7 +169,7 @@ func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
 		rightcode, _ := MakeIntermediate(AST.children[1], JMPlabel)
 		var tempcode code
 		tempcode.linecount = 7
-		tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR4 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR3 1\n" + strconv.Itoa(AST.linenumber) + " ICMP IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " CMOVNE IR4 IR3\n" + strconv.Itoa(AST.linenumber) + " PUSH IR4"
+		tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR4 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR3 1\n" + strconv.Itoa(AST.linenumber) + " ICMP IR1 IR2\n" + strconv.Itoa(AST.linenumber) + " CMOVNE IR4 IR3\n" + strconv.Itoa(AST.linenumber) + " PUSH IR4"
 		leftcode.AddCode(rightcode)
 		leftcode.AddCode(tempcode)
 		returncode.AddCode(leftcode)
@@ -160,9 +180,9 @@ func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
 		var tempcode code
 		tempcode.linecount = 7
 		if righttype == INTEGER || righttype == BOOLEAN {
-			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR4 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR3 1\n" + strconv.Itoa(AST.linenumber) + " ICMP IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " CMOVG IR4 IR3\n" + strconv.Itoa(AST.linenumber) + " PUSH IR4"
+			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR4 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR3 1\n" + strconv.Itoa(AST.linenumber) + " ICMP IR1 IR2\n" + strconv.Itoa(AST.linenumber) + " CMOVG IR4 IR3\n" + strconv.Itoa(AST.linenumber) + " PUSH IR4"
 		} else if righttype == FLOATING {
-			tempcode.store = strconv.Itoa(AST.linenumber) + " POP FR2\n" + strconv.Itoa(AST.linenumber) + " POP FR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR4 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR3 1\n" + strconv.Itoa(AST.linenumber) + " FCMP FR2 FR1\n" + strconv.Itoa(AST.linenumber) + " CMOVG IR4 IR3\n" + strconv.Itoa(AST.linenumber) + " PUSH IR4"
+			tempcode.store = strconv.Itoa(AST.linenumber) + " POP FR2\n" + strconv.Itoa(AST.linenumber) + " POP FR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR4 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR3 1\n" + strconv.Itoa(AST.linenumber) + " FCMP FR1 FR2\n" + strconv.Itoa(AST.linenumber) + " CMOVG IR4 IR3\n" + strconv.Itoa(AST.linenumber) + " PUSH IR4"
 		}
 		leftcode.AddCode(rightcode)
 		leftcode.AddCode(tempcode)
@@ -174,9 +194,9 @@ func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
 		var tempcode code
 		tempcode.linecount = 7
 		if righttype == INTEGER || righttype == BOOLEAN {
-			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR4 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR3 1\n" + strconv.Itoa(AST.linenumber) + " ICMP IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " CMOVL IR4 IR3\n" + strconv.Itoa(AST.linenumber) + " PUSH IR4"
+			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR4 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR3 1\n" + strconv.Itoa(AST.linenumber) + " ICMP IR1 IR2\n" + strconv.Itoa(AST.linenumber) + " CMOVL IR4 IR3\n" + strconv.Itoa(AST.linenumber) + " PUSH IR4"
 		} else if righttype == FLOATING {
-			tempcode.store = strconv.Itoa(AST.linenumber) + " POP FR2\n" + strconv.Itoa(AST.linenumber) + " POP FR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR4 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR3 1\n" + strconv.Itoa(AST.linenumber) + " FCMP FR2 FR1\n" + strconv.Itoa(AST.linenumber) + " CMOVL IR4 IR3\n" + strconv.Itoa(AST.linenumber) + " PUSH IR4"
+			tempcode.store = strconv.Itoa(AST.linenumber) + " POP FR2\n" + strconv.Itoa(AST.linenumber) + " POP FR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR4 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR3 1\n" + strconv.Itoa(AST.linenumber) + " FCMP FR1 FR2\n" + strconv.Itoa(AST.linenumber) + " CMOVL IR4 IR3\n" + strconv.Itoa(AST.linenumber) + " PUSH IR4"
 		}
 		leftcode.AddCode(rightcode)
 		leftcode.AddCode(tempcode)
@@ -188,9 +208,9 @@ func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
 		var tempcode code
 		tempcode.linecount = 7
 		if righttype == INTEGER || righttype == BOOLEAN {
-			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR4 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR3 1\n" + strconv.Itoa(AST.linenumber) + " ICMP IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " CMOVGE IR4 IR3\n" + strconv.Itoa(AST.linenumber) + " PUSH IR4"
+			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR4 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR3 1\n" + strconv.Itoa(AST.linenumber) + " ICMP IR1 IR2\n" + strconv.Itoa(AST.linenumber) + " CMOVGE IR4 IR3\n" + strconv.Itoa(AST.linenumber) + " PUSH IR4"
 		} else if righttype == FLOATING {
-			tempcode.store = strconv.Itoa(AST.linenumber) + " POP FR2\n" + strconv.Itoa(AST.linenumber) + " POP FR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR4 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR3 1\n" + strconv.Itoa(AST.linenumber) + " FCMP FR2 FR1\n" + strconv.Itoa(AST.linenumber) + " CMOVGE IR4 IR3\n" + strconv.Itoa(AST.linenumber) + " PUSH IR4"
+			tempcode.store = strconv.Itoa(AST.linenumber) + " POP FR2\n" + strconv.Itoa(AST.linenumber) + " POP FR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR4 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR3 1\n" + strconv.Itoa(AST.linenumber) + " FCMP FR1 FR2\n" + strconv.Itoa(AST.linenumber) + " CMOVGE IR4 IR3\n" + strconv.Itoa(AST.linenumber) + " PUSH IR4"
 		}
 		leftcode.AddCode(rightcode)
 		leftcode.AddCode(tempcode)
@@ -202,9 +222,9 @@ func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
 		var tempcode code
 		tempcode.linecount = 7
 		if righttype == INTEGER || righttype == BOOLEAN {
-			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR4 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR3 1\n" + strconv.Itoa(AST.linenumber) + " ICMP IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " CMOVLE IR4 IR3\n" + strconv.Itoa(AST.linenumber) + " PUSH IR4"
+			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR4 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR3 1\n" + strconv.Itoa(AST.linenumber) + " ICMP IR1 IR2\n" + strconv.Itoa(AST.linenumber) + " CMOVLE IR4 IR3\n" + strconv.Itoa(AST.linenumber) + " PUSH IR4"
 		} else if righttype == FLOATING {
-			tempcode.store = strconv.Itoa(AST.linenumber) + " POP FR2\n" + strconv.Itoa(AST.linenumber) + " POP FR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR4 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR3 1\n" + strconv.Itoa(AST.linenumber) + " FCMP FR2 FR1\n" + strconv.Itoa(AST.linenumber) + " CMOVLE IR4 IR3\n" + strconv.Itoa(AST.linenumber) + " PUSH IR4"
+			tempcode.store = strconv.Itoa(AST.linenumber) + " POP FR2\n" + strconv.Itoa(AST.linenumber) + " POP FR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR4 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR3 1\n" + strconv.Itoa(AST.linenumber) + " FCMP FR1 FR2\n" + strconv.Itoa(AST.linenumber) + " CMOVLE IR4 IR3\n" + strconv.Itoa(AST.linenumber) + " PUSH IR4"
 		}
 		leftcode.AddCode(rightcode)
 		leftcode.AddCode(tempcode)
