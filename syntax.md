@@ -56,6 +56,27 @@ bool value = a == b;
 bool othervalue = a < b;
 ```
 
+## Selection
+
+If statements will have its truth condition directly next to it
+
+```
+if true {
+    // Do stuff
+}
+```
+
+A variable or expression can also be placed instead
+
+```
+if a {
+    // Do stuff
+}
+if false == a {
+    // Do stuff
+}
+```
+
 ## Functions
 
 ### Main function
