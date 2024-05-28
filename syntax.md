@@ -128,7 +128,7 @@ func otherfunction() () {
 function();
 ```
 
-### Passing parameter to a function
+### Passing parameters to a function
 
 ```
 function() <<< parameter <<< otherparameter;
