@@ -26,6 +26,7 @@ Floats should always have a .0 or another value to the right of the whole number
 ```
 int value = 1;
 float othervalue = 1.0;
+bool alsoavalue = true;
 ```
 
 ## Arithmetic operators
@@ -35,6 +36,24 @@ Floats cannot be mixed with integers in math
 ```
 int value = 1 + 4 * 3 / 4 - 4;
 float othervalue = 1.0 + 4.0 * 3.0 / 4.0 - 4.0;
+```
+
+## Logical operations
+
+```
+a == b
+a != b
+a > b
+a < b
+a >= b
+a <= b
+```
+
+These operations can then be stored in boolean variables
+
+```
+bool value = a == b;
+bool othervalue = a < b;
 ```
 
 ## Functions

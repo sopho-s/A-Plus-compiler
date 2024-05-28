@@ -7,7 +7,7 @@ func MakePostfix(nodes []node) section {
 	var il idlist
 	il.count = 0
 	for _, value := range nodes {
-		if value.token == IDENT || value.token == INT || value.token == FLOAT || value.token == FUNC {
+		if value.token == IDENT || value.token == INT || value.token == FLOAT || value.token == BOOL || value.token == FUNC {
 			if value.token == IDENT {
 				value.id = il.GetId()
 			}
@@ -76,7 +76,7 @@ func ConvertPostfix(postfixcode section) node {
 		var nodestack stack
 		for !line.IsEmpty() {
 			currnode := line.Dequeue()
-			if currnode.token == IDENT || currnode.token == INT || currnode.token == FLOAT || currnode.token == FUNC {
+			if currnode.token == IDENT || currnode.token == INT || currnode.token == FLOAT || currnode.token == BOOL || currnode.token == FUNC {
 				nodestack.Push(currnode)
 			} else {
 				var left node

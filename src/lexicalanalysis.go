@@ -89,7 +89,27 @@ func (l *lexer) Lex() (position, token, string) {
 		case '/':
 			return l.pos, IDIV, "/"
 		case '=':
-			return l.pos, ASSIGN, "="
+			l.pos.column++
+			r, _, err = l.reader.ReadRune()
+			switch r {
+			case '=':
+				return l.pos, ISEQUAL, "=="
+			default:
+				l.pos.column--
+				l.Backup()
+				return l.pos, ASSIGN, "="
+			}
+		case '!':
+			l.pos.column++
+			r, _, err = l.reader.ReadRune()
+			switch r {
+			case '=':
+				return l.pos, ISNOTEQUAL, "!="
+			default:
+				l.pos.column--
+				l.Backup()
+				return l.pos, ILLEGAL, "!"
+			}
 		case '.':
 			return l.pos, POINT, "."
 		case '(':
@@ -169,6 +189,10 @@ func (l *lexer) Lex() (position, token, string) {
 					return startPos, FUNC, lit
 				case "return":
 					return startPos, RETURN, lit
+				case "true":
+					return startPos, BOOL, lit
+				case "false":
+					return startPos, BOOL, lit
 				default:
 					return startPos, IDENT, lit
 				}

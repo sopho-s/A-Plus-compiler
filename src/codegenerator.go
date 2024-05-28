@@ -102,6 +102,18 @@ func ConvertToNASM(intcode string, funcname string, floatcountmap *map[string]in
 				log[index-startindex].assemblycode.AddStringCode("MOVSS " + registers[linesplit[2]] + ", DWORD [ESP + " + strconv.FormatInt(int64(stackcount)*4, 10) + "]")
 			}
 			break
+		case "CMP":
+			outcode.AddStringCode("CMP " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
+			log[index-startindex].assemblycode.AddStringCode("CMP " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
+			break
+		case "CMOVE":
+			outcode.AddStringCode("CMOVE " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
+			log[index-startindex].assemblycode.AddStringCode("CMOVE " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
+			break
+		case "CMOVNE":
+			outcode.AddStringCode("CMOVNE " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
+			log[index-startindex].assemblycode.AddStringCode("CMOVNE " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
+			break
 		case "IADD":
 			outcode.AddStringCode("ADD " + registers[linesplit[2]] + ", " + registers[linesplit[3]])
 			log[index-startindex].assemblycode.AddStringCode("ADD " + registers[linesplit[2]] + ", " + registers[linesplit[3]])

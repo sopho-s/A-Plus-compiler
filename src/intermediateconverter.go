@@ -15,6 +15,8 @@ func MakeIntermediate(AST *node) (code, int) {
 				returncode.store = strconv.Itoa(AST.linenumber) + " IMOV IR3 " + AST.value + " IDENT\n" + strconv.Itoa(AST.linenumber) + " PUSH IR3"
 			} else if AST.variable.vartype == FLOATING {
 				returncode.store = strconv.Itoa(AST.linenumber) + " FMOV FR3 " + AST.value + " IDENT\n" + strconv.Itoa(AST.linenumber) + " PUSH FR3"
+			} else if AST.variable.vartype == BOOLEAN {
+				returncode.store = strconv.Itoa(AST.linenumber) + " IMOV IR3 " + AST.value + " IDENT\n" + strconv.Itoa(AST.linenumber) + " PUSH IR3"
 			}
 			returncode.linecount = 2
 			return returncode, AST.variable.vartype
@@ -29,12 +31,20 @@ func MakeIntermediate(AST *node) (code, int) {
 				floatval, _ := strconv.ParseFloat(AST.value, 32)
 				hexstring := fmt.Sprintf("%X", math.Float32bits(float32(floatval)))
 				returncode.store = strconv.Itoa(AST.linenumber) + " FMOV FR3 0x" + hexstring + "\n" + strconv.Itoa(AST.linenumber) + " PUSH FR3"
+			} else if AST.token == BOOL {
+				boolval := "0"
+				if AST.value == "true" {
+					boolval = "1"
+				}
+				returncode.store = strconv.Itoa(AST.linenumber) + " IMOV IR3 " + boolval + "\n" + strconv.Itoa(AST.linenumber) + " PUSH IR3"
 			}
 			returncode.linecount = 2
 			if AST.token == INT {
 				return returncode, INTEGER
 			} else if AST.token == FLOAT {
 				return returncode, FLOATING
+			} else if AST.token == BOOL {
+				return returncode, BOOLEAN
 			}
 			return returncode, VOID
 		}
@@ -105,9 +115,31 @@ func MakeIntermediate(AST *node) (code, int) {
 			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " ISTR " + AST.children[0].value + " IR2"
 		} else if lefttype == FLOATING {
 			tempcode.store = strconv.Itoa(AST.linenumber) + " POP FR2\n" + strconv.Itoa(AST.linenumber) + " FSTR " + AST.children[0].value + " FR2"
+		} else if lefttype == BOOLEAN {
+			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " ISTR " + AST.children[0].value + " IR2"
 		}
 		returncode.AddCode(rightcode)
 		returncode.AddCode(tempcode)
+		return returncode, lefttype
+	case ISEQUAL:
+		leftcode, lefttype := MakeIntermediate(AST.children[0])
+		rightcode, _ := MakeIntermediate(AST.children[1])
+		var tempcode code
+		tempcode.linecount = 4
+		tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " CMP IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " MOV IR2 0\n" + strconv.Itoa(AST.linenumber) + " MOV IR1 1\n" + strconv.Itoa(AST.linenumber) + " CMOVE IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " PUSH IR2"
+		leftcode.AddCode(rightcode)
+		leftcode.AddCode(tempcode)
+		returncode.AddCode(leftcode)
+		return returncode, lefttype
+	case ISNOTEQUAL:
+		leftcode, lefttype := MakeIntermediate(AST.children[0])
+		rightcode, _ := MakeIntermediate(AST.children[1])
+		var tempcode code
+		tempcode.linecount = 4
+		tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " CMP IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " MOV IR2 0\n" + strconv.Itoa(AST.linenumber) + " MOV IR1 1\n" + strconv.Itoa(AST.linenumber) + " CMOVNE IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " PUSH IR2"
+		leftcode.AddCode(rightcode)
+		leftcode.AddCode(tempcode)
+		returncode.AddCode(leftcode)
 		return returncode, lefttype
 	case RETURN:
 		rightcode, righttype := MakeIntermediate(AST.children[1])
@@ -117,6 +149,8 @@ func MakeIntermediate(AST *node) (code, int) {
 			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " PUSH IR2\n" + strconv.Itoa(AST.linenumber) + " RET"
 		} else if righttype == FLOATING {
 			tempcode.store = strconv.Itoa(AST.linenumber) + " POP FR2\n" + strconv.Itoa(AST.linenumber) + " PUSH FR2\n" + strconv.Itoa(AST.linenumber) + " RET"
+		} else if righttype == BOOLEAN {
+			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " PUSH IR2\n" + strconv.Itoa(AST.linenumber) + " RET"
 		}
 		returncode.AddCode(rightcode)
 		returncode.AddCode(tempcode)
@@ -130,6 +164,8 @@ func MakeIntermediate(AST *node) (code, int) {
 			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " PUSH IR1"
 		} else if righttype == FLOATING {
 			tempcode.store = strconv.Itoa(AST.linenumber) + " POP FR1\n" + strconv.Itoa(AST.linenumber) + " PUSH FR1"
+		} else if righttype == BOOLEAN {
+			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " PUSH IR1"
 		}
 		returncode.AddCode(rightcode)
 		returncode.AddCode(tempcode)

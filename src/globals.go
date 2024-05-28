@@ -8,6 +8,7 @@ const (
 	IDENT
 	INT
 	FLOAT
+	BOOL
 	FUNC
 	SEMI
 	OPENBRACKET
@@ -21,6 +22,10 @@ const (
 	SUB
 	IMUL
 	IDIV
+
+	// comparisons
+	ISEQUAL
+	ISNOTEQUAL
 
 	ASSIGN
 	POINT
@@ -46,12 +51,14 @@ const (
 	VOID = iota
 	INTEGER
 	FLOATING
+	BOOLEAN
 )
 
 var types = map[string]int{
 	"void":  VOID,
 	"int":   INTEGER,
 	"float": FLOATING,
+	"bool":  BOOLEAN,
 }
 
 var registers = map[string]string{
@@ -74,6 +81,7 @@ var tokens = []string{
 	IDENT:         "IDENT",
 	INT:           "INT",
 	FLOAT:         "FLOAT",
+	BOOL:          "BOOL",
 	FUNC:          "FUNC",
 	SEMI:          ";",
 	OPENBRACKET:   "(",
@@ -86,6 +94,9 @@ var tokens = []string{
 	SUB:  "-",
 	IMUL: "*",
 	IDIV: "/",
+
+	ISEQUAL:    "==",
+	ISNOTEQUAL: "!=",
 
 	ASSIGN: "=",
 	POINT:  ".",
@@ -102,6 +113,8 @@ var precedence = map[int]int{
 	CLOSEBRACKET:  -1,
 	RETURN:        0,
 	ASSIGN:        0,
+	ISEQUAL:       1,
+	ISNOTEQUAL:    1,
 	PIPEIN:        1,
 	ADD:           2,
 	SUB:           2,

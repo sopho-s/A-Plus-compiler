@@ -38,6 +38,10 @@
 				"match": "\\b(int|string|bool|float|const)\\b"
 			},
 			{
+				"name": "keyword.truthstatements.ap",
+				"match": "\\b(true|false)\\b"
+			},
+			{
 				"name": "keyword.functiondefiner.ap",
 				"match": "func"
 			}, 
