@@ -99,6 +99,17 @@ func (l *lexer) Lex() (position, token, string) {
 				l.Backup()
 				return l.pos, ASSIGN, "="
 			}
+		case '>':
+			l.pos.column++
+			r, _, err = l.reader.ReadRune()
+			switch r {
+			case '=':
+				return l.pos, ISEQUAL, "=="
+			default:
+				l.pos.column--
+				l.Backup()
+				return l.pos, ASSIGN, "="
+			}
 		case '!':
 			l.pos.column++
 			r, _, err = l.reader.ReadRune()

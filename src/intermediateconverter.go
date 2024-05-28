@@ -122,29 +122,85 @@ func MakeIntermediate(AST *node) (code, int) {
 		returncode.AddCode(tempcode)
 		return returncode, lefttype
 	case ISEQUAL:
-		leftcode, lefttype := MakeIntermediate(AST.children[0])
+		leftcode, _ := MakeIntermediate(AST.children[0])
 		rightcode, _ := MakeIntermediate(AST.children[1])
 		var tempcode code
-		tempcode.linecount = 4
-		tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " CMP IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " MOV IR2 0\n" + strconv.Itoa(AST.linenumber) + " MOV IR1 1\n" + strconv.Itoa(AST.linenumber) + " CMOVE IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " PUSH IR2"
+		tempcode.linecount = 7
+		tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " ICMP IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR2 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR1 1\n" + strconv.Itoa(AST.linenumber) + " CMOVE IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " PUSH IR2"
 		leftcode.AddCode(rightcode)
 		leftcode.AddCode(tempcode)
 		returncode.AddCode(leftcode)
-		return returncode, lefttype
+		return returncode, BOOLEAN
 	case ISNOTEQUAL:
-		leftcode, lefttype := MakeIntermediate(AST.children[0])
+		leftcode, _ := MakeIntermediate(AST.children[0])
 		rightcode, _ := MakeIntermediate(AST.children[1])
 		var tempcode code
-		tempcode.linecount = 4
-		tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " CMP IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " MOV IR2 0\n" + strconv.Itoa(AST.linenumber) + " MOV IR1 1\n" + strconv.Itoa(AST.linenumber) + " CMOVNE IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " PUSH IR2"
+		tempcode.linecount = 7
+		tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " ICMP IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR2 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR1 1\n" + strconv.Itoa(AST.linenumber) + " CMOVNE IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " PUSH IR2"
 		leftcode.AddCode(rightcode)
 		leftcode.AddCode(tempcode)
 		returncode.AddCode(leftcode)
-		return returncode, lefttype
+		return returncode, BOOLEAN
+	case GREATER:
+		leftcode, _ := MakeIntermediate(AST.children[0])
+		rightcode, righttype := MakeIntermediate(AST.children[1])
+		var tempcode code
+		tempcode.linecount = 7
+		if righttype == INTEGER || righttype == BOOLEAN {
+			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " ICMP IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR2 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR1 1\n" + strconv.Itoa(AST.linenumber) + " CMOVG IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " PUSH IR2"
+		} else if righttype == FLOATING {
+			tempcode.store = strconv.Itoa(AST.linenumber) + " POP FR2\n" + strconv.Itoa(AST.linenumber) + " POP FR1\n" + strconv.Itoa(AST.linenumber) + " FCMP FR2 FR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR2 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR1 1\n" + strconv.Itoa(AST.linenumber) + " CMOVG IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " PUSH IR2"
+		}
+		leftcode.AddCode(rightcode)
+		leftcode.AddCode(tempcode)
+		returncode.AddCode(leftcode)
+		return returncode, BOOLEAN
+	case LESS:
+		leftcode, _ := MakeIntermediate(AST.children[0])
+		rightcode, righttype := MakeIntermediate(AST.children[1])
+		var tempcode code
+		tempcode.linecount = 7
+		if righttype == INTEGER || righttype == BOOLEAN {
+			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " ICMP IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR2 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR1 1\n" + strconv.Itoa(AST.linenumber) + " CMOVL IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " PUSH IR2"
+		} else if righttype == FLOATING {
+			tempcode.store = strconv.Itoa(AST.linenumber) + " POP FR2\n" + strconv.Itoa(AST.linenumber) + " POP FR1\n" + strconv.Itoa(AST.linenumber) + " FCMP FR2 FR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR2 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR1 1\n" + strconv.Itoa(AST.linenumber) + " CMOVL IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " PUSH IR2"
+		}
+		leftcode.AddCode(rightcode)
+		leftcode.AddCode(tempcode)
+		returncode.AddCode(leftcode)
+		return returncode, BOOLEAN
+	case GREATEROREQUAL:
+		leftcode, _ := MakeIntermediate(AST.children[0])
+		rightcode, righttype := MakeIntermediate(AST.children[1])
+		var tempcode code
+		tempcode.linecount = 7
+		if righttype == INTEGER || righttype == BOOLEAN {
+			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " ICMP IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR2 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR1 1\n" + strconv.Itoa(AST.linenumber) + " CMOVGE IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " PUSH IR2"
+		} else if righttype == FLOATING {
+			tempcode.store = strconv.Itoa(AST.linenumber) + " POP FR2\n" + strconv.Itoa(AST.linenumber) + " POP FR1\n" + strconv.Itoa(AST.linenumber) + " FCMP FR2 FR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR2 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR1 1\n" + strconv.Itoa(AST.linenumber) + " CMOVGE IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " PUSH IR2"
+		}
+		leftcode.AddCode(rightcode)
+		leftcode.AddCode(tempcode)
+		returncode.AddCode(leftcode)
+		return returncode, BOOLEAN
+	case LESSOREQUAL:
+		leftcode, _ := MakeIntermediate(AST.children[0])
+		rightcode, righttype := MakeIntermediate(AST.children[1])
+		var tempcode code
+		tempcode.linecount = 7
+		if righttype == INTEGER || righttype == BOOLEAN {
+			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " ICMP IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR2 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR1 1\n" + strconv.Itoa(AST.linenumber) + " CMOVLE IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " PUSH IR2"
+		} else if righttype == FLOATING {
+			tempcode.store = strconv.Itoa(AST.linenumber) + " POP FR2\n" + strconv.Itoa(AST.linenumber) + " POP FR1\n" + strconv.Itoa(AST.linenumber) + " FCMP FR2 FR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR2 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR1 1\n" + strconv.Itoa(AST.linenumber) + " CMOVLE IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " PUSH IR2"
+		}
+		leftcode.AddCode(rightcode)
+		leftcode.AddCode(tempcode)
+		returncode.AddCode(leftcode)
+		return returncode, BOOLEAN
 	case RETURN:
 		rightcode, righttype := MakeIntermediate(AST.children[1])
 		var tempcode code
-		tempcode.linecount = 2
+		tempcode.linecount = 3
 		if righttype == INTEGER {
 			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " PUSH IR2\n" + strconv.Itoa(AST.linenumber) + " RET"
 		} else if righttype == FLOATING {

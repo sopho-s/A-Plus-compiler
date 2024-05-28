@@ -26,6 +26,10 @@ const (
 	// comparisons
 	ISEQUAL
 	ISNOTEQUAL
+	GREATER
+	GREATEROREQUAL
+	LESS
+	LESSOREQUAL
 
 	ASSIGN
 	POINT
@@ -95,8 +99,12 @@ var tokens = []string{
 	IMUL: "*",
 	IDIV: "/",
 
-	ISEQUAL:    "==",
-	ISNOTEQUAL: "!=",
+	ISEQUAL:        "==",
+	ISNOTEQUAL:     "!=",
+	GREATER:        ">",
+	GREATEROREQUAL: ">=",
+	LESS:           "<",
+	LESSOREQUAL:    "<=",
 
 	ASSIGN: "=",
 	POINT:  ".",
@@ -107,17 +115,21 @@ var tokens = []string{
 }
 
 var precedence = map[int]int{
-	OPENCBRACKET:  -2,
-	OPENBRACKET:   -2,
-	CLOSECBRACKET: -1,
-	CLOSEBRACKET:  -1,
-	RETURN:        0,
-	ASSIGN:        0,
-	ISEQUAL:       1,
-	ISNOTEQUAL:    1,
-	PIPEIN:        1,
-	ADD:           2,
-	SUB:           2,
-	IMUL:          3,
-	IDIV:          3,
+	OPENCBRACKET:   -2,
+	OPENBRACKET:    -2,
+	CLOSECBRACKET:  -1,
+	CLOSEBRACKET:   -1,
+	RETURN:         0,
+	ASSIGN:         0,
+	ISEQUAL:        1,
+	ISNOTEQUAL:     1,
+	GREATER:        1,
+	GREATEROREQUAL: 1,
+	LESS:           1,
+	LESSOREQUAL:    1,
+	PIPEIN:         1,
+	ADD:            2,
+	SUB:            2,
+	IMUL:           3,
+	IDIV:           3,
 }
