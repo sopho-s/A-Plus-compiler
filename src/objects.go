@@ -21,17 +21,18 @@ func (b *buf) Write(p []byte) (n int, err error) {
 func (b *buf) String() string { return string(*b) }
 
 type node struct {
-	id           int
-	token        token
-	value        string
-	size         int
-	children     []*node
-	isvariable   bool
-	variable     variable
-	linenumber   int
-	columnnumber int
-	isloop       bool
-	looptype     int
+	id            int
+	token         token
+	value         string
+	size          int
+	children      []*node
+	isvariable    bool
+	variable      variable
+	linenumber    int
+	columnnumber  int
+	isloop        bool
+	looptype      int
+	isbeingcalled bool
 }
 
 type nodefunction struct {
@@ -94,6 +95,16 @@ func (df *definedfunctions) AddFunction(nf nodefunction) {
 func (df *definedfunctions) CheckFunctionExists(funcname string) bool {
 	_, isin := df.functions[funcname]
 	return isin
+}
+
+func (df *definedfunctions) CountFunctionParameters(funcname string) int {
+	val, _ := df.functions[funcname]
+	return len(val.parameters)
+}
+
+func (df *definedfunctions) CountFunctionReturns(funcname string) int {
+	val, _ := df.functions[funcname]
+	return len(val.returns)
 }
 
 func (il *idlist) GetId() int {

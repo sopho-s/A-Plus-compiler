@@ -122,6 +122,11 @@ func CheckVariables(nodes []node, vl variablelist, bl *buildlog, noerror bool, p
 					}
 				} else {
 					nodes[index].token = FUNC
+					if nodes[index+1].token == OPENBRACKET {
+						if nodes[index+2].token == CLOSEBRACKET {
+							nodes[index].isbeingcalled = true
+						}
+					}
 				}
 			} else {
 				nodes[index].variable.vartype = vl.GetVariableType(vari)

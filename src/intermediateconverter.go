@@ -18,6 +18,10 @@ func MakeIntermediate(AST *node) (code, int) {
 			}
 			returncode.linecount = 2
 			return returncode, AST.variable.vartype
+		} else if AST.token == FUNC && AST.isbeingcalled {
+			returncode.store = strconv.Itoa(AST.linenumber) + " CALL " + AST.value
+			returncode.linecount = 1
+			return returncode, AST.variable.vartype
 		} else {
 			if AST.token == INT {
 				returncode.store = strconv.Itoa(AST.linenumber) + " IMOV IR3 " + AST.value + "\n" + strconv.Itoa(AST.linenumber) + " PUSH IR3"
@@ -93,28 +97,43 @@ func MakeIntermediate(AST *node) (code, int) {
 		returncode.AddCode(leftcode)
 		return returncode, lefttype
 	case ASSIGN:
-		rightcode, righttype := MakeIntermediate(AST.children[1])
+		_, lefttype := MakeIntermediate(AST.children[0])
+		rightcode, _ := MakeIntermediate(AST.children[1])
 		var tempcode code
 		tempcode.linecount = 2
-		if righttype == INTEGER {
+		if lefttype == INTEGER {
 			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " ISTR " + AST.children[0].value + " IR2"
-		} else if righttype == FLOATING {
+		} else if lefttype == FLOATING {
 			tempcode.store = strconv.Itoa(AST.linenumber) + " POP FR2\n" + strconv.Itoa(AST.linenumber) + " FSTR " + AST.children[0].value + " FR2"
 		}
 		returncode.AddCode(rightcode)
 		returncode.AddCode(tempcode)
-		return returncode, righttype
+		return returncode, lefttype
 	case RETURN:
 		rightcode, righttype := MakeIntermediate(AST.children[1])
 		var tempcode code
 		tempcode.linecount = 2
 		if righttype == INTEGER {
-			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " PUSH IR2\n" + strconv.Itoa(AST.linenumber) + " ISUB SP 4\n" + strconv.Itoa(AST.linenumber) + " RET"
+			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " PUSH IR2\n" + strconv.Itoa(AST.linenumber) + " RET"
 		} else if righttype == FLOATING {
-			tempcode.store = strconv.Itoa(AST.linenumber) + " POP FR2\n" + strconv.Itoa(AST.linenumber) + " PUSH FR2\n" + strconv.Itoa(AST.linenumber) + " ISUB SP 4\n" + strconv.Itoa(AST.linenumber) + " RET"
+			tempcode.store = strconv.Itoa(AST.linenumber) + " POP FR2\n" + strconv.Itoa(AST.linenumber) + " PUSH FR2\n" + strconv.Itoa(AST.linenumber) + " RET"
 		}
 		returncode.AddCode(rightcode)
 		returncode.AddCode(tempcode)
+		return returncode, righttype
+	case PIPEIN:
+		leftcode, _ := MakeIntermediate(AST.children[0])
+		rightcode, righttype := MakeIntermediate(AST.children[1])
+		var tempcode code
+		tempcode.linecount = 2
+		if righttype == INTEGER {
+			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " PUSH IR1"
+		} else if righttype == FLOATING {
+			tempcode.store = strconv.Itoa(AST.linenumber) + " POP FR1\n" + strconv.Itoa(AST.linenumber) + " PUSH FR1"
+		}
+		returncode.AddCode(rightcode)
+		returncode.AddCode(tempcode)
+		returncode.AddCode(leftcode)
 		return returncode, righttype
 	default:
 		break
@@ -167,6 +186,9 @@ func RemoveRandomMovs(intcode string) string {
 		line2 := strings.Split(splitcode[i+1], " ")
 		if i < len(splitcode)-2 {
 			line3 := strings.Split(splitcode[i+2], " ")
+			if len(line3) == 1 {
+				break
+			}
 			if line3[1] == "ISUB" || line3[1] == "IDIV" || line3[1] == "FSUB" || line3[1] == "FDIV" {
 				returncode.AddStringCode(splitcode[i])
 				i++
@@ -225,7 +247,9 @@ func RemovePointlessPushPops(intcode string) string {
 			for t > 0 {
 				t--
 				checkline := strings.Split(splitcode[t], " ")
-				if checkline[2] == reg {
+				if checkline[1] == "CALL" {
+					break
+				} else if checkline[2] == reg {
 					break
 				} else if len(checkline) >= 4 {
 					if checkline[3] == reg {

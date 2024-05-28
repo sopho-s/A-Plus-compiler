@@ -96,7 +96,6 @@ func main() {
 	var funccode code
 	var df definedfunctions
 	df.functions = make(map[string]nodefunction)
-	offsetmap := make(map[string]int)
 	floatcountmap := make(map[string]int)
 	for _, function := range functions {
 		function.RemoveStartAndEnd()
@@ -168,7 +167,7 @@ func main() {
 		if verbose {
 			fmt.Println("Optimising and converting intermediate code into assembly for \"" + function.name + "\"")
 		}
-		writecode, predatacode, logcode := ConvertToNASM(OptimiseIntermediate(outcode.store), function.name, &offsetmap, &floatcountmap)
+		writecode, predatacode, logcode := ConvertToNASM(OptimiseIntermediate(outcode.store), function.name, &floatcountmap, function.parameters, df)
 		datacode.AddCode(predatacode)
 		compilationlog.AddLog("Assembly created", 0)
 		if verbose {

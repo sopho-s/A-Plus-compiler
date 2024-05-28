@@ -76,7 +76,7 @@ func ConvertPostfix(postfixcode section) node {
 		var nodestack stack
 		for !line.IsEmpty() {
 			currnode := line.Dequeue()
-			if currnode.token == IDENT || currnode.token == INT || currnode.token == FLOAT {
+			if currnode.token == IDENT || currnode.token == INT || currnode.token == FLOAT || currnode.token == FUNC {
 				nodestack.Push(currnode)
 			} else {
 				var left node
