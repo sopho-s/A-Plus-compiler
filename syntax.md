@@ -38,6 +38,15 @@ int value = 1 + 4 * 3 / 4 - 4;
 float othervalue = 1.0 + 4.0 * 3.0 / 4.0 - 4.0;
 ```
 
+## Bitwise operators
+
+Bitwise operators may be used on any type, if done between two truth values it will give the result of that truth value with the operator
+
+```
+int value = 1 & 2; // 1
+bool othervalue = true | false; // true
+```
+
 ## Logical operations
 
 ```
@@ -73,6 +82,17 @@ if a {
     // Do stuff
 }
 if false == a {
+    // Do stuff
+}
+```
+
+Bitwise operators can be used also
+
+```
+if a | b {
+    // Do stuff
+}
+if a > b & b > c {
     // Do stuff
 }
 ```
