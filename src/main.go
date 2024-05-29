@@ -98,6 +98,7 @@ func main() {
 	df.functions = make(map[string]nodefunction)
 	floatcountmap := make(map[string]int)
 	JMPlabel := 0
+	loopJMPlabel := 0
 	for _, function := range functions {
 		function.RemoveStartAndEnd()
 		df.AddFunction(function)
@@ -117,7 +118,7 @@ func main() {
 		if verbose {
 			fmt.Println("Seperating sections")
 		}
-		nodes = SeperateSections(nodes, &JMPlabel, &compilationlog)
+		nodes = SeperateSections(nodes, &JMPlabel, &loopJMPlabel, &compilationlog)
 		compilationlog.AddLog("Sections seperated", 0)
 		if verbose {
 			fmt.Println("Sections seperated")
@@ -160,7 +161,7 @@ func main() {
 			fmt.Println("Making intermediate code for \"" + function.name + "\"")
 		}
 		for _, node := range AST.children {
-			newcode, _ := MakeIntermediate(node, &JMPlabel)
+			newcode, _ := MakeIntermediate(node, &JMPlabel, loopJMPlabel)
 			outcode.AddCode(newcode)
 		}
 		compilationlog.AddLog("Intermediate code created", 0)

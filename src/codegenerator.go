@@ -27,7 +27,17 @@ func ConvertToNASM(intcode string, funcname string, floatcountmap *map[string]in
 		funcname = "_main"
 	}
 	outcode.AddStringCode(funcname + ":")
-	startindex, _ := strconv.ParseInt(strings.Split(splitcode[0], " ")[0], 10, 32)
+	startindex := int64(10000000)
+	maxindex := int64(-1)
+	for _, value := range splitcode {
+		temp, _ := strconv.ParseInt(strings.Split(value, " ")[0], 10, 32)
+		if temp < int64(startindex) {
+			startindex = temp
+		}
+		if temp > maxindex {
+			maxindex = temp
+		}
+	}
 	offsetmap := make(map[string]int)
 	paramcount := len(parameters)
 	t := 0
@@ -44,15 +54,15 @@ func ConvertToNASM(intcode string, funcname string, floatcountmap *map[string]in
 		outcode.AddStringCode("MOV [EBP-" + strconv.Itoa(offset+4) + "], EAX")
 		t++
 	}
+	for i := range maxindex - startindex + 1 {
+		var singlelog loggingconversion
+		singlelog.originalcodenum = int(startindex) + int(i) - 1
+		log = append(log, &singlelog)
+	}
 	stackcount := 1
 	for _, value := range splitcode {
 		linesplit := strings.Split(value, " ")
 		index, _ := strconv.ParseInt(linesplit[0], 10, 32)
-		if len(log) <= int(index)-1 {
-			var singlelog loggingconversion
-			singlelog.originalcodenum = int(index) - 1
-			log = append(log, &singlelog)
-		}
 		switch linesplit[1] {
 		case "CALL":
 			outcode.AddStringCode("SUB EBP, " + strconv.FormatInt((int64(variablecount+stackcount))*4, 10))
@@ -97,6 +107,10 @@ func ConvertToNASM(intcode string, funcname string, floatcountmap *map[string]in
 			log[index-startindex].assemblycode.AddStringCode("RET")
 			break
 		case "JNE":
+			outcode.AddStringCode(linesplit[1] + " " + linesplit[2])
+			log[index-startindex].assemblycode.AddStringCode(linesplit[1] + " " + linesplit[2])
+			break
+		case "JMP":
 			outcode.AddStringCode(linesplit[1] + " " + linesplit[2])
 			log[index-startindex].assemblycode.AddStringCode(linesplit[1] + " " + linesplit[2])
 			break

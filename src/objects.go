@@ -35,6 +35,7 @@ type node struct {
 	isbeingcalled    bool
 	condition        []node
 	conditionintcode *code
+	loopnum          int
 }
 
 type nodefunction struct {

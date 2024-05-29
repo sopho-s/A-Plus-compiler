@@ -85,16 +85,17 @@ func SeperateFunctions(nodes []node, bl *buildlog) ([]nodefunction, bool) {
 	return functionlist, true
 }
 
-func SeperateSections(nodes []node, JMPlabel *int, bl *buildlog) []node {
+func SeperateSections(nodes []node, JMPlabel *int, loopJMPlabel *int, bl *buildlog) []node {
 	index := 0
 	returnnodes := make([]node, 0)
 	lastconditionindex := 0
 	isgettingsection := false
+	var temp int
 	for {
 		if index == len(nodes) {
 			break
 		}
-		if !isgettingsection && nodes[index].token == IF {
+		if !isgettingsection && (nodes[index].token == IF || nodes[index].token == DO) {
 			isgettingsection = true
 			lastconditionindex = index
 			index++
@@ -106,8 +107,12 @@ func SeperateSections(nodes []node, JMPlabel *int, bl *buildlog) []node {
 			tempnodes := nodes[lastconditionindex].condition
 			outqueue := MakePostfix(tempnodes)
 			AST := ConvertPostfix(outqueue).children[0]
-			newcode, _ := MakeIntermediate(AST, JMPlabel)
+			newcode, _ := MakeIntermediate(AST, JMPlabel, temp)
 			nodes[lastconditionindex].conditionintcode = &newcode
+			nodes[lastconditionindex].loopnum = *loopJMPlabel
+			if nodes[lastconditionindex].token == DO {
+				*loopJMPlabel++
+			}
 			returnnodes = append(returnnodes, nodes[lastconditionindex])
 			returnnodes = append(returnnodes, nodes[index])
 			index++

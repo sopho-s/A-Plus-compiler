@@ -17,6 +17,7 @@ const (
 	CLOSECBRACKET
 	RETURN
 	EXIT
+	BREAK
 
 	// operators
 	ADD
@@ -43,6 +44,7 @@ const (
 	INCLUDE
 
 	IF
+	DO
 )
 
 const (
@@ -100,6 +102,7 @@ var tokens = []string{
 	CLOSECBRACKET: "}",
 	RETURN:        "RETURN",
 	EXIT:          "EXIT",
+	BREAK:         "BREAK",
 
 	ADD:  "+",
 	SUB:  "-",
@@ -124,6 +127,7 @@ var tokens = []string{
 	INCLUDE: "INCLUDE",
 
 	IF: "IF",
+	DO: "DO",
 }
 
 var precedence = map[int]int{
@@ -134,6 +138,7 @@ var precedence = map[int]int{
 	RETURN:         0,
 	ASSIGN:         0,
 	EXIT:           0,
+	BREAK:          0,
 	OR:             1,
 	AND:            2,
 	ISEQUAL:        3,

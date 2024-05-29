@@ -106,7 +106,7 @@ func ConvertPostfix(postfixcode section) node {
 			currnode := line.Dequeue()
 			if currnode.token == IDENT || currnode.token == INT || currnode.token == FLOAT || currnode.token == BOOL || currnode.token == FUNC {
 				nodestack.Push(currnode)
-			} else if currnode.token == IF {
+			} else if currnode.token == IF || currnode.token == DO {
 				nodestack.Push(currnode)
 			} else {
 				var left node
@@ -118,12 +118,12 @@ func ConvertPostfix(postfixcode section) node {
 				nodestack.Push(currnode)
 			}
 		}
-		if !isinsection && nodestack.Peek().token != IF {
+		if !isinsection && (nodestack.Peek().token != IF && nodestack.Peek().token != DO) {
 			tempnode := nodestack.Pop()
 			sectionnode.LinkNode(&tempnode)
 		} else {
 			currnode := nodestack.Pop()
-			if currnode.token == IF {
+			if currnode.token == IF || currnode.token == DO {
 				sectionnodestack.Push(currnode)
 				var openbrac node
 				openbrac.token = OPENCBRACKET
@@ -135,8 +135,12 @@ func ConvertPostfix(postfixcode section) node {
 				for {
 					tempnode := tempnodestack.Pop()
 					if tempnode.token == OPENCBRACKET {
-						tempnodestack.Push(sectionno)
-						isinsection = false
+						if sectionnodestack.IsEmpty() {
+							tempnodestack.Push(sectionno)
+							isinsection = false
+						} else {
+							sectionnodestack.stack[sectionnodestack.count-1].LinkNode(&sectionno)
+						}
 						break
 					} else if tempnode.token != CLOSECBRACKET {
 						sectionno.LinkNode(&tempnode)
@@ -146,7 +150,7 @@ func ConvertPostfix(postfixcode section) node {
 			if sectionnodestack.IsEmpty() {
 				tempnode := tempnodestack.Pop()
 				sectionnode.LinkNode(&tempnode)
-			} else if currnode.token != IF {
+			} else if currnode.token != IF && currnode.token != DO {
 				tempnodestack.Push(currnode)
 			}
 		}

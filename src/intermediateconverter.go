@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
+func MakeIntermediate(AST *node, JMPlabel *int, currentsectloop int) (code, int) {
 	var returncode code
 	if AST.IsLeaf() {
 		if AST.token == IDENT {
@@ -53,7 +53,7 @@ func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
 	case IF:
 		var body code
 		for index := range AST.size {
-			bodycode, _ := MakeIntermediate(AST.children[index], JMPlabel)
+			bodycode, _ := MakeIntermediate(AST.children[index], JMPlabel, currentsectloop)
 			body.AddCode(bodycode)
 		}
 		var tempcode code
@@ -64,9 +64,25 @@ func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
 		*JMPlabel++
 		returncode.AddCode(tempcode)
 		return returncode, VOID
+	case DO:
+		var body code
+		for index := range AST.size {
+			bodycode, _ := MakeIntermediate(AST.children[index], JMPlabel, AST.loopnum)
+			body.AddCode(bodycode)
+		}
+		var tempcode code
+		tempcode.AddStringCode(strconv.Itoa(AST.linenumber) + " LABEL loop" + strconv.Itoa(AST.loopnum))
+		tempcode.AddCode(body)
+		tempcode.AddStringCode(strconv.Itoa(AST.linenumber) + " JMP loop" + strconv.Itoa(AST.loopnum) + "\n" + strconv.Itoa(AST.linenumber) + " LABEL loopend" + strconv.Itoa(AST.loopnum))
+		*JMPlabel++
+		returncode.AddCode(tempcode)
+		return returncode, VOID
+	case BREAK:
+		returncode.AddStringCode(strconv.Itoa(AST.linenumber) + " JMP loopend" + strconv.Itoa(AST.loopnum))
+		return returncode, VOID
 	case AND:
-		leftcode, lefttype := MakeIntermediate(AST.children[0], JMPlabel)
-		rightcode, _ := MakeIntermediate(AST.children[1], JMPlabel)
+		leftcode, lefttype := MakeIntermediate(AST.children[0], JMPlabel, currentsectloop)
+		rightcode, _ := MakeIntermediate(AST.children[1], JMPlabel, currentsectloop)
 		var tempcode code
 		tempcode.linecount = 4
 		tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " AND IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " PUSH IR2"
@@ -75,8 +91,8 @@ func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
 		returncode.AddCode(leftcode)
 		return returncode, lefttype
 	case OR:
-		leftcode, lefttype := MakeIntermediate(AST.children[0], JMPlabel)
-		rightcode, _ := MakeIntermediate(AST.children[1], JMPlabel)
+		leftcode, lefttype := MakeIntermediate(AST.children[0], JMPlabel, currentsectloop)
+		rightcode, _ := MakeIntermediate(AST.children[1], JMPlabel, currentsectloop)
 		var tempcode code
 		tempcode.linecount = 4
 		tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " OR IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " PUSH IR2"
@@ -85,8 +101,8 @@ func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
 		returncode.AddCode(leftcode)
 		return returncode, lefttype
 	case ADD:
-		leftcode, lefttype := MakeIntermediate(AST.children[0], JMPlabel)
-		rightcode, righttype := MakeIntermediate(AST.children[1], JMPlabel)
+		leftcode, lefttype := MakeIntermediate(AST.children[0], JMPlabel, currentsectloop)
+		rightcode, righttype := MakeIntermediate(AST.children[1], JMPlabel, currentsectloop)
 		var tempcode code
 		tempcode.linecount = 4
 		if righttype == INTEGER {
@@ -99,8 +115,8 @@ func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
 		returncode.AddCode(leftcode)
 		return returncode, lefttype
 	case SUB:
-		leftcode, lefttype := MakeIntermediate(AST.children[0], JMPlabel)
-		rightcode, righttype := MakeIntermediate(AST.children[1], JMPlabel)
+		leftcode, lefttype := MakeIntermediate(AST.children[0], JMPlabel, currentsectloop)
+		rightcode, righttype := MakeIntermediate(AST.children[1], JMPlabel, currentsectloop)
 		var tempcode code
 		tempcode.linecount = 4
 		if righttype == INTEGER {
@@ -113,8 +129,8 @@ func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
 		returncode.AddCode(leftcode)
 		return returncode, lefttype
 	case IMUL:
-		leftcode, lefttype := MakeIntermediate(AST.children[0], JMPlabel)
-		rightcode, righttype := MakeIntermediate(AST.children[1], JMPlabel)
+		leftcode, lefttype := MakeIntermediate(AST.children[0], JMPlabel, currentsectloop)
+		rightcode, righttype := MakeIntermediate(AST.children[1], JMPlabel, currentsectloop)
 		var tempcode code
 		tempcode.linecount = 4
 		if righttype == INTEGER {
@@ -127,8 +143,8 @@ func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
 		returncode.AddCode(leftcode)
 		return returncode, lefttype
 	case IDIV:
-		leftcode, lefttype := MakeIntermediate(AST.children[0], JMPlabel)
-		rightcode, righttype := MakeIntermediate(AST.children[1], JMPlabel)
+		leftcode, lefttype := MakeIntermediate(AST.children[0], JMPlabel, currentsectloop)
+		rightcode, righttype := MakeIntermediate(AST.children[1], JMPlabel, currentsectloop)
 		var tempcode code
 		tempcode.linecount = 4
 		if righttype == INTEGER {
@@ -141,8 +157,8 @@ func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
 		returncode.AddCode(leftcode)
 		return returncode, lefttype
 	case MOD:
-		leftcode, lefttype := MakeIntermediate(AST.children[0], JMPlabel)
-		rightcode, righttype := MakeIntermediate(AST.children[1], JMPlabel)
+		leftcode, lefttype := MakeIntermediate(AST.children[0], JMPlabel, currentsectloop)
+		rightcode, righttype := MakeIntermediate(AST.children[1], JMPlabel, currentsectloop)
 		var tempcode code
 		tempcode.linecount = 4
 		if righttype == INTEGER {
@@ -153,8 +169,8 @@ func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
 		returncode.AddCode(leftcode)
 		return returncode, lefttype
 	case ASSIGN:
-		_, lefttype := MakeIntermediate(AST.children[0], JMPlabel)
-		rightcode, _ := MakeIntermediate(AST.children[1], JMPlabel)
+		_, lefttype := MakeIntermediate(AST.children[0], JMPlabel, currentsectloop)
+		rightcode, _ := MakeIntermediate(AST.children[1], JMPlabel, currentsectloop)
 		var tempcode code
 		tempcode.linecount = 2
 		if lefttype == INTEGER {
@@ -168,8 +184,8 @@ func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
 		returncode.AddCode(tempcode)
 		return returncode, lefttype
 	case ISEQUAL:
-		leftcode, _ := MakeIntermediate(AST.children[0], JMPlabel)
-		rightcode, _ := MakeIntermediate(AST.children[1], JMPlabel)
+		leftcode, _ := MakeIntermediate(AST.children[0], JMPlabel, currentsectloop)
+		rightcode, _ := MakeIntermediate(AST.children[1], JMPlabel, currentsectloop)
 		var tempcode code
 		tempcode.linecount = 7
 		tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR4 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR3 1\n" + strconv.Itoa(AST.linenumber) + " ICMP IR2 IR1\n" + strconv.Itoa(AST.linenumber) + " CMOVE IR4 IR3\n" + strconv.Itoa(AST.linenumber) + " PUSH IR4"
@@ -178,8 +194,8 @@ func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
 		returncode.AddCode(leftcode)
 		return returncode, BOOLEAN
 	case ISNOTEQUAL:
-		leftcode, _ := MakeIntermediate(AST.children[0], JMPlabel)
-		rightcode, _ := MakeIntermediate(AST.children[1], JMPlabel)
+		leftcode, _ := MakeIntermediate(AST.children[0], JMPlabel, currentsectloop)
+		rightcode, _ := MakeIntermediate(AST.children[1], JMPlabel, currentsectloop)
 		var tempcode code
 		tempcode.linecount = 7
 		tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " IMOV IR4 0\n" + strconv.Itoa(AST.linenumber) + " IMOV IR3 1\n" + strconv.Itoa(AST.linenumber) + " ICMP IR1 IR2\n" + strconv.Itoa(AST.linenumber) + " CMOVNE IR4 IR3\n" + strconv.Itoa(AST.linenumber) + " PUSH IR4"
@@ -188,8 +204,8 @@ func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
 		returncode.AddCode(leftcode)
 		return returncode, BOOLEAN
 	case GREATER:
-		leftcode, _ := MakeIntermediate(AST.children[0], JMPlabel)
-		rightcode, righttype := MakeIntermediate(AST.children[1], JMPlabel)
+		leftcode, _ := MakeIntermediate(AST.children[0], JMPlabel, currentsectloop)
+		rightcode, righttype := MakeIntermediate(AST.children[1], JMPlabel, currentsectloop)
 		var tempcode code
 		tempcode.linecount = 7
 		if righttype == INTEGER || righttype == BOOLEAN {
@@ -202,8 +218,8 @@ func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
 		returncode.AddCode(leftcode)
 		return returncode, BOOLEAN
 	case LESS:
-		leftcode, _ := MakeIntermediate(AST.children[0], JMPlabel)
-		rightcode, righttype := MakeIntermediate(AST.children[1], JMPlabel)
+		leftcode, _ := MakeIntermediate(AST.children[0], JMPlabel, currentsectloop)
+		rightcode, righttype := MakeIntermediate(AST.children[1], JMPlabel, currentsectloop)
 		var tempcode code
 		tempcode.linecount = 7
 		if righttype == INTEGER || righttype == BOOLEAN {
@@ -216,8 +232,8 @@ func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
 		returncode.AddCode(leftcode)
 		return returncode, BOOLEAN
 	case GREATEROREQUAL:
-		leftcode, _ := MakeIntermediate(AST.children[0], JMPlabel)
-		rightcode, righttype := MakeIntermediate(AST.children[1], JMPlabel)
+		leftcode, _ := MakeIntermediate(AST.children[0], JMPlabel, currentsectloop)
+		rightcode, righttype := MakeIntermediate(AST.children[1], JMPlabel, currentsectloop)
 		var tempcode code
 		tempcode.linecount = 7
 		if righttype == INTEGER || righttype == BOOLEAN {
@@ -230,8 +246,8 @@ func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
 		returncode.AddCode(leftcode)
 		return returncode, BOOLEAN
 	case LESSOREQUAL:
-		leftcode, _ := MakeIntermediate(AST.children[0], JMPlabel)
-		rightcode, righttype := MakeIntermediate(AST.children[1], JMPlabel)
+		leftcode, _ := MakeIntermediate(AST.children[0], JMPlabel, currentsectloop)
+		rightcode, righttype := MakeIntermediate(AST.children[1], JMPlabel, currentsectloop)
 		var tempcode code
 		tempcode.linecount = 7
 		if righttype == INTEGER || righttype == BOOLEAN {
@@ -244,7 +260,7 @@ func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
 		returncode.AddCode(leftcode)
 		return returncode, BOOLEAN
 	case RETURN:
-		rightcode, righttype := MakeIntermediate(AST.children[1], JMPlabel)
+		rightcode, righttype := MakeIntermediate(AST.children[1], JMPlabel, currentsectloop)
 		var tempcode code
 		tempcode.linecount = 3
 		if righttype == INTEGER {
@@ -258,7 +274,7 @@ func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
 		returncode.AddCode(tempcode)
 		return returncode, righttype
 	case EXIT:
-		rightcode, righttype := MakeIntermediate(AST.children[1], JMPlabel)
+		rightcode, righttype := MakeIntermediate(AST.children[1], JMPlabel, currentsectloop)
 		var tempcode code
 		tempcode.linecount = 2
 		tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR3\n" + strconv.Itoa(AST.linenumber) + " EXIT"
@@ -266,8 +282,8 @@ func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
 		returncode.AddCode(tempcode)
 		return returncode, righttype
 	case PIPEIN:
-		leftcode, _ := MakeIntermediate(AST.children[0], JMPlabel)
-		rightcode, righttype := MakeIntermediate(AST.children[1], JMPlabel)
+		leftcode, _ := MakeIntermediate(AST.children[0], JMPlabel, currentsectloop)
+		rightcode, righttype := MakeIntermediate(AST.children[1], JMPlabel, currentsectloop)
 		var tempcode code
 		tempcode.linecount = 2
 		if righttype == INTEGER {
