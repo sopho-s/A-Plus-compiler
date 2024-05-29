@@ -235,11 +235,11 @@ func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
 		var tempcode code
 		tempcode.linecount = 3
 		if righttype == INTEGER {
-			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " PUSH IR2\n" + strconv.Itoa(AST.linenumber) + " RET"
+			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " RET IR2"
 		} else if righttype == FLOATING {
-			tempcode.store = strconv.Itoa(AST.linenumber) + " POP FR2\n" + strconv.Itoa(AST.linenumber) + " PUSH FR2\n" + strconv.Itoa(AST.linenumber) + " RET"
+			tempcode.store = strconv.Itoa(AST.linenumber) + " POP FR2\n" + strconv.Itoa(AST.linenumber) + " RET FR2"
 		} else if righttype == BOOLEAN {
-			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " PUSH IR2\n" + strconv.Itoa(AST.linenumber) + " RET"
+			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " RET IR2"
 		}
 		returncode.AddCode(rightcode)
 		returncode.AddCode(tempcode)

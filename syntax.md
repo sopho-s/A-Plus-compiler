@@ -133,3 +133,20 @@ function();
 ```
 function() <<< parameter <<< otherparameter;
 ```
+
+### Exiting from main
+
+To return an exit process value you can do the following
+
+```
+func main() () {
+    int val = 2;
+    exit 1 + val;
+}
+```
+
+This value can then be seen using
+
+```
+echo %errorlevel%
+```

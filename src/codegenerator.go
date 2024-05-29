@@ -63,14 +63,15 @@ func ConvertToNASM(intcode string, funcname string, floatcountmap *map[string]in
 			log[index-startindex].assemblycode.AddStringCode("CALL " + linesplit[2])
 			count := functions.CountFunctionReturns(linesplit[2])
 			if count == 1 {
-				stackcount--
-				outcode.AddStringCode("MOV EBX, DWORD [EBP -  " + strconv.FormatInt(int64(variablecount+stackcount)*4, 10) + "]")
-				log[index-startindex].assemblycode.AddStringCode("MOV EBX, DWORD [EBP - " + strconv.FormatInt(int64(variablecount+stackcount)*4, 10) + "]")
+				outcode.AddStringCode("MOV EBX, DWORD [EBP - 8]")
+				log[index-startindex].assemblycode.AddStringCode("MOV EBX, DWORD [EBP - 8]")
 			}
 			outcode.AddStringCode("ADD EBP, " + strconv.FormatInt((int64(variablecount+stackcount+1))*4, 10))
 			log[index-startindex].assemblycode.AddStringCode("ADD EBP, " + strconv.FormatInt((int64(variablecount+stackcount+1))*4, 10))
 			outcode.AddStringCode("MOV ESP, EBP")
 			log[index-startindex].assemblycode.AddStringCode("MOV ESP, EBP")
+			outcode.AddStringCode("SUB ESP, 4")
+			log[index-startindex].assemblycode.AddStringCode("SUB ESP, 4")
 
 			count = functions.CountFunctionParameters(linesplit[2])
 			if count > 0 {
@@ -84,6 +85,13 @@ func ConvertToNASM(intcode string, funcname string, floatcountmap *map[string]in
 			}
 			break
 		case "RET":
+			if string(linesplit[2][0]) == "I" {
+				outcode.AddStringCode("MOV [EBP-8], " + registers[linesplit[2]])
+				log[index-startindex].assemblycode.AddStringCode("MOV [EBP-8], " + registers[linesplit[2]])
+			} else if string(linesplit[2][0]) == "F" {
+				outcode.AddStringCode("MOVSS [EBP-8], " + registers[linesplit[2]])
+				log[index-startindex].assemblycode.AddStringCode("MOVSS [EBP-8], " + registers[linesplit[2]])
+			}
 			outcode.AddStringCode("RET")
 			log[index-startindex].assemblycode.AddStringCode("RET")
 			break

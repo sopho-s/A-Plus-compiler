@@ -6,5 +6,5 @@ func TriangleNumbers(int count) (int) {
 }
 func main() () {
     int a = TriangleNumbers() <<< 3;
-    int b = TriangleNumbers() <<< 5;
+    exit a;
 }

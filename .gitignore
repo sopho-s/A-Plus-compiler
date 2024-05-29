@@ -6,3 +6,4 @@ main.ap
 *.asm
 *.exe
 *.txt
+tests/run.bat
