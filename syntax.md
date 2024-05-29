@@ -97,6 +97,19 @@ if a > b & b > c {
 }
 ```
 
+## Iteration
+
+A do statement will continue until it is broken out of
+
+```
+do {
+    if a == 0 {
+        break;
+    }
+    a = a - 1;
+}
+```
+
 ## Functions
 
 ### Main function
