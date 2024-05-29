@@ -5,6 +5,6 @@ func TriangleNumbers(int count) (int) {
     return count;
 }
 func main() () {
-    int a = TriangleNumbers() <<< 3;
+    int a = TriangleNumbers() <<< 100000;
     exit a;
 }

@@ -35,7 +35,7 @@ func ConvertToNASM(intcode string, funcname string, floatcountmap *map[string]in
 		if paramcount == t {
 			break
 		}
-		curroffset := (t + 1) * 4
+		curroffset := t * 4
 		outcode.AddStringCode("MOV EAX, DWORD [EBP + " + strconv.FormatInt(int64(curroffset), 10) + "]")
 		offset := 0
 		offset = len(offsetmap) * 4
@@ -50,12 +50,13 @@ func ConvertToNASM(intcode string, funcname string, floatcountmap *map[string]in
 		index, _ := strconv.ParseInt(linesplit[0], 10, 32)
 		if len(log) <= int(index)-1 {
 			var singlelog loggingconversion
+			singlelog.originalcodenum = int(index) - 1
 			log = append(log, &singlelog)
 		}
 		switch linesplit[1] {
 		case "CALL":
-			outcode.AddStringCode("SUB EBP, " + strconv.FormatInt((int64(variablecount+stackcount+1))*4, 10))
-			log[index-startindex].assemblycode.AddStringCode("SUB EBP, " + strconv.FormatInt((int64(variablecount+stackcount+1))*4, 10))
+			outcode.AddStringCode("SUB EBP, " + strconv.FormatInt((int64(variablecount+stackcount))*4, 10))
+			log[index-startindex].assemblycode.AddStringCode("SUB EBP, " + strconv.FormatInt((int64(variablecount+stackcount))*4, 10))
 			outcode.AddStringCode("MOV ESP, EBP")
 			log[index-startindex].assemblycode.AddStringCode("MOV ESP, EBP")
 
@@ -66,8 +67,8 @@ func ConvertToNASM(intcode string, funcname string, floatcountmap *map[string]in
 				outcode.AddStringCode("MOV EBX, DWORD [EBP - 8]")
 				log[index-startindex].assemblycode.AddStringCode("MOV EBX, DWORD [EBP - 8]")
 			}
-			outcode.AddStringCode("ADD EBP, " + strconv.FormatInt((int64(variablecount+stackcount+1))*4, 10))
-			log[index-startindex].assemblycode.AddStringCode("ADD EBP, " + strconv.FormatInt((int64(variablecount+stackcount+1))*4, 10))
+			outcode.AddStringCode("ADD EBP, " + strconv.FormatInt((int64(variablecount+stackcount))*4, 10))
+			log[index-startindex].assemblycode.AddStringCode("ADD EBP, " + strconv.FormatInt((int64(variablecount+stackcount))*4, 10))
 			outcode.AddStringCode("MOV ESP, EBP")
 			log[index-startindex].assemblycode.AddStringCode("MOV ESP, EBP")
 			outcode.AddStringCode("SUB ESP, 4")

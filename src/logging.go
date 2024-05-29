@@ -25,8 +25,8 @@ type buildlog struct {
 
 func SetLoggingConversion(apcode string, lc []*loggingconversion) {
 	splitcode := strings.Split(apcode, "\n")
-	for index, val := range splitcode {
-		lc[index].originalcode.AddStringCode(val)
+	for index, val := range lc {
+		lc[index].originalcode.AddStringCode(splitcode[val.originalcodenum])
 	}
 }
 

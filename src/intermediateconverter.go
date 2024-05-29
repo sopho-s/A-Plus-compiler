@@ -61,6 +61,7 @@ func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
 		tempcode.AddStringCode(strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " ICMP IR1 1\n" + strconv.Itoa(AST.linenumber) + " JNE if" + strconv.Itoa(*JMPlabel))
 		tempcode.AddCode(body)
 		tempcode.AddStringCode(strconv.Itoa(AST.linenumber) + " LABEL if" + strconv.Itoa(*JMPlabel))
+		*JMPlabel++
 		returncode.AddCode(tempcode)
 		return returncode, VOID
 	case AND:
@@ -134,6 +135,18 @@ func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
 			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " IDIV IR2\n" + strconv.Itoa(AST.linenumber) + " PUSH IR1"
 		} else if righttype == FLOATING {
 			tempcode.store = strconv.Itoa(AST.linenumber) + " POP FR2\n" + strconv.Itoa(AST.linenumber) + " POP FR1\n" + strconv.Itoa(AST.linenumber) + " FDIV FR1 FR2\n" + strconv.Itoa(AST.linenumber) + " PUSH FR1"
+		}
+		leftcode.AddCode(rightcode)
+		leftcode.AddCode(tempcode)
+		returncode.AddCode(leftcode)
+		return returncode, lefttype
+	case MOD:
+		leftcode, lefttype := MakeIntermediate(AST.children[0], JMPlabel)
+		rightcode, righttype := MakeIntermediate(AST.children[1], JMPlabel)
+		var tempcode code
+		tempcode.linecount = 4
+		if righttype == INTEGER {
+			tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR2\n" + strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " IDIV IR2\n" + strconv.Itoa(AST.linenumber) + " PUSH IR4"
 		}
 		leftcode.AddCode(rightcode)
 		leftcode.AddCode(tempcode)

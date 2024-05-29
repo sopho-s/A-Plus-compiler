@@ -186,7 +186,7 @@ func main() {
 			fmt.Println("Assembly created")
 		}
 		f.WriteString(writecode.store)
-		file, _ := os.ReadFile("build/" + inputfile)
+		file, _ := os.ReadFile("build/build.ap")
 		SetLoggingConversion(string(file), logcode)
 		_ = os.Mkdir("log", 0755)
 		f, _ = os.Create("log/" + function.name + "codelog.log")

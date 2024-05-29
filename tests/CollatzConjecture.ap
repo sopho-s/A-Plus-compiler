@@ -1,0 +1,19 @@
+func IsEven(int n) (bool) {
+    if n % 2 == 0 {
+        return true;
+    }
+    return false;
+}
+func CollatzConjecture(int n, int count) (int) {
+    if n == 1 {
+        return count;
+    }
+    if IsEven() <<< n {
+        return CollatzConjecture() <<< (n/2) <<< (count + 1);
+    }
+    return CollatzConjecture() <<< (n*3 + 1) <<< (count + 1);
+}
+func main() () {
+    int a = CollatzConjecture() <<< 24 <<< 1;
+    exit a;
+}

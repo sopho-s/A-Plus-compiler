@@ -25,6 +25,7 @@ const (
 	IDIV
 	AND
 	OR
+	MOD
 
 	// comparisons
 	ISEQUAL
@@ -106,6 +107,7 @@ var tokens = []string{
 	IDIV: "/",
 	AND:  "&",
 	OR:   "|",
+	MOD:  "%",
 
 	ISEQUAL:        "==",
 	ISNOTEQUAL:     "!=",
@@ -142,7 +144,8 @@ var precedence = map[int]int{
 	LESSOREQUAL:    3,
 	ADD:            4,
 	SUB:            4,
-	IMUL:           4,
+	IMUL:           5,
 	IDIV:           5,
+	MOD:            5,
 	PIPEIN:         6,
 }

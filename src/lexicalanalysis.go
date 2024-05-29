@@ -135,6 +135,8 @@ func (l *lexer) Lex() (position, token, string) {
 			return l.pos, OR, "|"
 		case '&':
 			return l.pos, AND, "&"
+		case '%':
+			return l.pos, MOD, "%"
 		case ',':
 			return l.pos, COMMA, ","
 		case '<':

@@ -136,6 +136,7 @@ func ConvertPostfix(postfixcode section) node {
 					tempnode := tempnodestack.Pop()
 					if tempnode.token == OPENCBRACKET {
 						tempnodestack.Push(sectionno)
+						isinsection = false
 						break
 					} else if tempnode.token != CLOSECBRACKET {
 						sectionno.LinkNode(&tempnode)
