@@ -119,7 +119,7 @@ func SeperateSections(nodes []node, JMPlabel *int, bl *buildlog) []node {
 	return returnnodes
 }
 
-func SyntaxAnalysis(nodes []node, bl buildlog, noerror bool, predefinedvar variablelist, predefinedfunctions definedfunctions) ([]node, bool, buildlog) {
+func SyntaxAnalysis(nodes []node, bl buildlog, noerror bool, predefinedvar variablelist, predefinedfunctions definedfunctions) ([]node, bool, int, buildlog) {
 	returnval := true
 	shouldcontinue := CheckBrackets(nodes, &bl, noerror)
 	if !shouldcontinue {
@@ -137,7 +137,7 @@ func SyntaxAnalysis(nodes []node, bl buildlog, noerror bool, predefinedvar varia
 		fmt.Println("Lmao imagine making a syntax error, I am not gonna tell you where it is LOL, Gl nerd")
 		bl.AddLog(fmt.Sprintf("Lmao imagine making a syntax error, I am not gonna tell you where it is LOL, Gl nerds"), 2)
 	}
-	return nodes, returnval, bl
+	return nodes, returnval, vl.count, bl
 }
 
 func CheckVariables(nodes []node, vl variablelist, bl *buildlog, noerror bool, predefinedfunctions definedfunctions) ([]node, bool) {

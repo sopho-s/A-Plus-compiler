@@ -110,14 +110,14 @@ func main() {
 		if verbose {
 			fmt.Println("Performing syntax analysis on \"" + function.name + "\"")
 		}
-		nodes, shouldcontinue, compilationlog = SyntaxAnalysis(nodes, compilationlog, nosyntax, vl, df)
+		nodes, shouldcontinue, variablecount, compilationlog := SyntaxAnalysis(nodes, compilationlog, nosyntax, vl, df)
 		compilationlog.AddLog("Syntax analysis finished", 0)
 
 		compilationlog.AddLog("Seperating sections", 0)
 		if verbose {
 			fmt.Println("Seperating sections")
 		}
-		nodes := SeperateSections(nodes, &JMPlabel, &compilationlog)
+		nodes = SeperateSections(nodes, &JMPlabel, &compilationlog)
 		compilationlog.AddLog("Sections seperated", 0)
 		if verbose {
 			fmt.Println("Sections seperated")
@@ -179,7 +179,7 @@ func main() {
 		if verbose {
 			fmt.Println("Optimising and converting intermediate code into assembly for \"" + function.name + "\"")
 		}
-		writecode, predatacode, logcode := ConvertToNASM(OptimiseIntermediate(outcode.store), function.name, &floatcountmap, function.parameters, df)
+		writecode, predatacode, logcode := ConvertToNASM(OptimiseIntermediate(outcode.store), function.name, &floatcountmap, function.parameters, df, variablecount)
 		datacode.AddCode(predatacode)
 		compilationlog.AddLog("Assembly created", 0)
 		if verbose {
@@ -253,7 +253,7 @@ func main() {
 	if verbose {
 		fmt.Println("Compiling to executable")
 	}
-	cmd = exec.Command("gcc", "-Wall", "-Wextra", "-o", "build/"+outputfile, "build/build.obj")
+	cmd = exec.Command("gcc", "-m32", "-Wall", "-Wextra", "-o", "build/"+outputfile, "build/build.obj", "-lkernel32")
 	cmd.Stderr = &stderr
 	_, err = cmd.Output()
 

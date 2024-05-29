@@ -31,7 +31,7 @@
 		"keywords": {
 			"patterns": [{
 				"name": "keyword.control.ap",
-				"match": "\\b(if|while|for|return)\\b"
+				"match": "\\b(if|while|for|return|exit)\\b"
 			},
 			{
 				"name": "keyword.identifier.ap",
@@ -42,13 +42,13 @@
 				"match": "\\b(true|false)\\b"
 			},
 			{
-				"name": "keyword.functiondefiner.ap",
-				"match": "func"
-			}, 
-			{
 			"name": "keyword.functionname.ap",
 			"match": "(?<=func\\s+)\\w*"
 			},
+			{
+				"name": "keyword.functiondefiner.ap",
+				"match": "func"
+			}, 
 			{
 			"name": "keyword.include.ap",
 			"match": "#include"

@@ -16,6 +16,7 @@ const (
 	OPENCBRACKET
 	CLOSECBRACKET
 	RETURN
+	EXIT
 
 	// operators
 	ADD
@@ -97,6 +98,7 @@ var tokens = []string{
 	OPENCBRACKET:  "{",
 	CLOSECBRACKET: "}",
 	RETURN:        "RETURN",
+	EXIT:          "EXIT",
 
 	ADD:  "+",
 	SUB:  "-",
@@ -129,6 +131,7 @@ var precedence = map[int]int{
 	CLOSEBRACKET:   -1,
 	RETURN:         0,
 	ASSIGN:         0,
+	EXIT:           0,
 	OR:             1,
 	AND:            2,
 	ISEQUAL:        3,

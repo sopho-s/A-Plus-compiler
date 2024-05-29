@@ -244,6 +244,14 @@ func MakeIntermediate(AST *node, JMPlabel *int) (code, int) {
 		returncode.AddCode(rightcode)
 		returncode.AddCode(tempcode)
 		return returncode, righttype
+	case EXIT:
+		rightcode, righttype := MakeIntermediate(AST.children[1], JMPlabel)
+		var tempcode code
+		tempcode.linecount = 2
+		tempcode.store = strconv.Itoa(AST.linenumber) + " POP IR3\n" + strconv.Itoa(AST.linenumber) + " EXIT"
+		returncode.AddCode(rightcode)
+		returncode.AddCode(tempcode)
+		return returncode, righttype
 	case PIPEIN:
 		leftcode, _ := MakeIntermediate(AST.children[0], JMPlabel)
 		rightcode, righttype := MakeIntermediate(AST.children[1], JMPlabel)

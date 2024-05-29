@@ -11,12 +11,13 @@ func AddingPrecodeToFunctions(functions code, data code) code {
 	outcode.AddStringCode("section .data")
 	outcode.AddCode(data)
 	outcode.AddStringCode("section .text")
+	outcode.AddStringCode("extern _ExitProcess@4")
 	outcode.AddStringCode("{ASSEMBLYLINKHERE}")
 	outcode.AddCode(functions)
 	return outcode
 }
 
-func ConvertToNASM(intcode string, funcname string, floatcountmap *map[string]int, parameters []node, functions definedfunctions) (code, code, []*loggingconversion) {
+func ConvertToNASM(intcode string, funcname string, floatcountmap *map[string]int, parameters []node, functions definedfunctions, variablecount int) (code, code, []*loggingconversion) {
 	splitcode := strings.Split(intcode, "\n")
 	var precode code
 	var outcode code
@@ -35,12 +36,12 @@ func ConvertToNASM(intcode string, funcname string, floatcountmap *map[string]in
 			break
 		}
 		curroffset := (t + 1) * 4
-		outcode.AddStringCode("MOV EAX, DWORD [ESP - " + strconv.FormatInt(int64(curroffset), 10) + "]")
+		outcode.AddStringCode("MOV EAX, DWORD [EBP + " + strconv.FormatInt(int64(curroffset), 10) + "]")
 		offset := 0
 		offset = len(offsetmap) * 4
 		offset += 4
 		offsetmap[parameters[t].value] = offset
-		outcode.AddStringCode("MOV [EBP-" + strconv.Itoa(offset) + "], EAX")
+		outcode.AddStringCode("MOV [EBP-" + strconv.Itoa(offset+4) + "], EAX")
 		t++
 	}
 	stackcount := 1
@@ -53,30 +54,32 @@ func ConvertToNASM(intcode string, funcname string, floatcountmap *map[string]in
 		}
 		switch linesplit[1] {
 		case "CALL":
-			outcode.AddStringCode("SUB EBP, " + strconv.FormatInt((int64(len(offsetmap))+1)*4, 10))
-			log[index-startindex].assemblycode.AddStringCode("ADD ESP, " + strconv.FormatInt(int64(stackcount)*4, 10))
-			outcode.AddStringCode("ADD ESP, " + strconv.FormatInt((int64(stackcount)+1)*4, 10))
-			log[index-startindex].assemblycode.AddStringCode("ADD ESP, " + strconv.FormatInt(int64(stackcount)*4, 10))
+			outcode.AddStringCode("SUB EBP, " + strconv.FormatInt((int64(variablecount+stackcount+1))*4, 10))
+			log[index-startindex].assemblycode.AddStringCode("SUB EBP, " + strconv.FormatInt((int64(variablecount+stackcount+1))*4, 10))
+			outcode.AddStringCode("MOV ESP, EBP")
+			log[index-startindex].assemblycode.AddStringCode("MOV ESP, EBP")
+
 			outcode.AddStringCode("CALL " + linesplit[2])
 			log[index-startindex].assemblycode.AddStringCode("CALL " + linesplit[2])
 			count := functions.CountFunctionReturns(linesplit[2])
 			if count == 1 {
-				outcode.AddStringCode("MOV EBX, DWORD [ESP + 4]")
-				log[index-startindex].assemblycode.AddStringCode("MOV EBX, DWORD [ESP + 4]")
+				stackcount--
+				outcode.AddStringCode("MOV EBX, DWORD [EBP -  " + strconv.FormatInt(int64(variablecount+stackcount)*4, 10) + "]")
+				log[index-startindex].assemblycode.AddStringCode("MOV EBX, DWORD [EBP - " + strconv.FormatInt(int64(variablecount+stackcount)*4, 10) + "]")
 			}
-			log[index-startindex].assemblycode.AddStringCode("SUB ESP, " + strconv.FormatInt(int64(stackcount)*4, 10))
-			outcode.AddStringCode("SUB ESP, " + strconv.FormatInt((int64(stackcount)+1)*4, 10))
-			log[index-startindex].assemblycode.AddStringCode("SUB ESP, " + strconv.FormatInt(int64(stackcount)*4, 10))
-			outcode.AddStringCode("ADD EBP, " + strconv.FormatInt((int64(len(offsetmap))+1)*4, 10))
-			log[index-startindex].assemblycode.AddStringCode("ADD ESP, " + strconv.FormatInt((int64(len(offsetmap))+1)*4, 10))
+			outcode.AddStringCode("ADD EBP, " + strconv.FormatInt((int64(variablecount+stackcount+1))*4, 10))
+			log[index-startindex].assemblycode.AddStringCode("ADD EBP, " + strconv.FormatInt((int64(variablecount+stackcount+1))*4, 10))
+			outcode.AddStringCode("MOV ESP, EBP")
+			log[index-startindex].assemblycode.AddStringCode("MOV ESP, EBP")
+
 			count = functions.CountFunctionParameters(linesplit[2])
 			if count > 0 {
 				stackcount -= count
 			}
 			count = functions.CountFunctionReturns(linesplit[2])
 			if count == 1 {
-				outcode.AddStringCode("MOV [ESP + " + strconv.FormatInt(int64(stackcount)*4, 10) + "], EBX")
-				log[index-startindex].assemblycode.AddStringCode("MOV [ESP + " + strconv.FormatInt(int64(stackcount-1)*4, 10) + "], EBX")
+				outcode.AddStringCode("MOV [EBP - " + strconv.FormatInt(int64(variablecount+stackcount+1)*4, 10) + "], EBX")
+				log[index-startindex].assemblycode.AddStringCode("MOV [EBP - " + strconv.FormatInt(int64(variablecount+stackcount+1)*4, 10) + "], EBX")
 				stackcount++
 			}
 			break
@@ -100,26 +103,32 @@ func ConvertToNASM(intcode string, funcname string, floatcountmap *map[string]in
 			outcode.AddStringCode(linesplit[2] + ":")
 			log[index-startindex].assemblycode.AddStringCode(linesplit[2] + ":")
 			break
+		case "EXIT":
+			outcode.AddStringCode("PUSH ECX")
+			log[index-startindex].assemblycode.AddStringCode("PUSH ECX")
+			outcode.AddStringCode("CALL _ExitProcess@4")
+			log[index-startindex].assemblycode.AddStringCode("CALL _ExitProcess@4")
+			break
 		case "PUSH":
 			if string(linesplit[2][0]) == "I" {
-				outcode.AddStringCode("MOV [ESP + " + strconv.FormatInt(int64(stackcount)*4, 10) + "], " + registers[linesplit[2]])
-				log[index-startindex].assemblycode.AddStringCode("MOV [ESP + " + strconv.FormatInt(int64(stackcount)*4, 10) + "], " + registers[linesplit[2]])
+				outcode.AddStringCode("MOV [EBP - " + strconv.FormatInt(int64(variablecount+stackcount+1)*4, 10) + "], " + registers[linesplit[2]])
+				log[index-startindex].assemblycode.AddStringCode("MOV [EBP - " + strconv.FormatInt(int64(variablecount+stackcount+1)*4, 10) + "], " + registers[linesplit[2]])
 				stackcount++
 			} else if string(linesplit[2][0]) == "F" {
-				outcode.AddStringCode("MOVSS DWORD [ESP + " + strconv.FormatInt(int64(stackcount)*4, 10) + "], " + registers[linesplit[2]])
-				log[index-startindex].assemblycode.AddStringCode("MOVSS [ESP + " + strconv.FormatInt(int64(stackcount)*4, 10) + "], " + registers[linesplit[2]])
+				outcode.AddStringCode("MOVSS [EBP - " + strconv.FormatInt(int64(variablecount+stackcount+1)*4, 10) + "], " + registers[linesplit[2]])
+				log[index-startindex].assemblycode.AddStringCode("MOVSS [EBP - " + strconv.FormatInt(int64(variablecount+stackcount+1)*4, 10) + "], " + registers[linesplit[2]])
 				stackcount++
 			}
 			break
 		case "POP":
 			if string(linesplit[2][0]) == "I" {
 				stackcount--
-				outcode.AddStringCode("MOV " + registers[linesplit[2]] + ", DWORD [ESP + " + strconv.FormatInt(int64(stackcount)*4, 10) + "]")
-				log[index-startindex].assemblycode.AddStringCode("MOV " + registers[linesplit[2]] + ", DWORD [ESP + " + strconv.FormatInt(int64(stackcount)*4, 10) + "]")
+				outcode.AddStringCode("MOV " + registers[linesplit[2]] + ", DWORD [EBP - " + strconv.FormatInt(int64(variablecount+stackcount+1)*4, 10) + "]")
+				log[index-startindex].assemblycode.AddStringCode("MOV " + registers[linesplit[2]] + ", DWORD [EBP - " + strconv.FormatInt(int64(variablecount+stackcount+1)*4, 10) + "]")
 			} else if string(linesplit[2][0]) == "F" {
 				stackcount--
-				outcode.AddStringCode("MOVSS " + registers[linesplit[2]] + ", DWORD [ESP + " + strconv.FormatInt(int64(stackcount)*4, 10) + "]")
-				log[index-startindex].assemblycode.AddStringCode("MOVSS " + registers[linesplit[2]] + ", DWORD [ESP + " + strconv.FormatInt(int64(stackcount)*4, 10) + "]")
+				outcode.AddStringCode("MOVSS " + registers[linesplit[2]] + ", DWORD [EBP - " + strconv.FormatInt(int64(variablecount+stackcount+1)*4, 10) + "]")
+				log[index-startindex].assemblycode.AddStringCode("MOVSS " + registers[linesplit[2]] + ", DWORD [EBP - " + strconv.FormatInt(int64(variablecount+stackcount+1)*4, 10) + "]")
 			}
 			break
 		case "ICMP":
@@ -197,8 +206,8 @@ func ConvertToNASM(intcode string, funcname string, floatcountmap *map[string]in
 			} else {
 				if len(linesplit) == 5 {
 					val, _ := offsetmap[linesplit[3]]
-					outcode.AddStringCode("MOV " + registers[linesplit[2]] + ", [EBP-" + strconv.Itoa(val) + "]")
-					log[index-startindex].assemblycode.AddStringCode("MOV " + registers[linesplit[2]] + ", [EBP-" + strconv.Itoa(val) + "]")
+					outcode.AddStringCode("MOV " + registers[linesplit[2]] + ", [EBP-" + strconv.Itoa(val+4) + "]")
+					log[index-startindex].assemblycode.AddStringCode("MOV " + registers[linesplit[2]] + ", [EBP-" + strconv.Itoa(val+4) + "]")
 				} else {
 					outcode.AddStringCode("MOV " + registers[linesplit[2]] + ", " + linesplit[3])
 					log[index-startindex].assemblycode.AddStringCode("MOV " + registers[linesplit[2]] + ", " + linesplit[3])
@@ -212,11 +221,11 @@ func ConvertToNASM(intcode string, funcname string, floatcountmap *map[string]in
 				offset = len(offsetmap) * 4
 				offset += 4
 				offsetmap[linesplit[2]] = offset
-				outcode.AddStringCode("MOV [EBP-" + strconv.Itoa(offset) + "], " + registers[linesplit[3]])
-				log[index-startindex].assemblycode.AddStringCode("MOV [EBP-" + strconv.Itoa(offset) + "], " + registers[linesplit[3]])
+				outcode.AddStringCode("MOV [EBP-" + strconv.Itoa(offset+4) + "], " + registers[linesplit[3]])
+				log[index-startindex].assemblycode.AddStringCode("MOV [EBP-" + strconv.Itoa(offset+4) + "], " + registers[linesplit[3]])
 			} else {
-				outcode.AddStringCode("MOV [EBP-" + strconv.Itoa(val) + "], " + registers[linesplit[3]])
-				log[index-startindex].assemblycode.AddStringCode("MOV [EBP-" + strconv.Itoa(val) + "], " + registers[linesplit[3]])
+				outcode.AddStringCode("MOV [EBP-" + strconv.Itoa(val+4) + "], " + registers[linesplit[3]])
+				log[index-startindex].assemblycode.AddStringCode("MOV [EBP-" + strconv.Itoa(val+4) + "], " + registers[linesplit[3]])
 			}
 			break
 		case "FADD":
@@ -243,8 +252,8 @@ func ConvertToNASM(intcode string, funcname string, floatcountmap *map[string]in
 			} else {
 				if len(linesplit) == 5 {
 					val, _ := offsetmap[linesplit[3]]
-					outcode.AddStringCode("MOVSS " + registers[linesplit[2]] + ", [EBP-" + strconv.Itoa(val) + "]")
-					log[index-startindex].assemblycode.AddStringCode("MOVSS " + registers[linesplit[2]] + ", [EBP-" + strconv.Itoa(val) + "]")
+					outcode.AddStringCode("MOVSS " + registers[linesplit[2]] + ", [EBP-" + strconv.Itoa(val+4) + "]")
+					log[index-startindex].assemblycode.AddStringCode("MOVSS " + registers[linesplit[2]] + ", [EBP-" + strconv.Itoa(val+4) + "]")
 				} else {
 					count := 0
 					val, isin := (*floatcountmap)[linesplit[3]]
@@ -268,11 +277,11 @@ func ConvertToNASM(intcode string, funcname string, floatcountmap *map[string]in
 				offset = len(offsetmap) * 4
 				offset += 4
 				offsetmap[linesplit[2]] = offset
-				outcode.AddStringCode("MOVSS [EBP-" + strconv.Itoa(offset) + "], " + registers[linesplit[3]])
-				log[index-startindex].assemblycode.AddStringCode("MOVSS [EBP-" + strconv.Itoa(offset) + "], " + registers[linesplit[3]])
+				outcode.AddStringCode("MOVSS [EBP-" + strconv.Itoa(offset+4) + "], " + registers[linesplit[3]])
+				log[index-startindex].assemblycode.AddStringCode("MOVSS [EBP-" + strconv.Itoa(offset+4) + "], " + registers[linesplit[3]])
 			} else {
-				outcode.AddStringCode("MOVSS [EBP-" + strconv.Itoa(val) + "], " + registers[linesplit[3]])
-				log[index-startindex].assemblycode.AddStringCode("MOVSS [EBP-" + strconv.Itoa(val) + "], " + registers[linesplit[3]])
+				outcode.AddStringCode("MOVSS [EBP-" + strconv.Itoa(val+4) + "], " + registers[linesplit[3]])
+				log[index-startindex].assemblycode.AddStringCode("MOVSS [EBP-" + strconv.Itoa(val+4) + "], " + registers[linesplit[3]])
 			}
 			break
 		}
