@@ -45,6 +45,7 @@ const (
 
 	IF
 	DO
+	FOR
 )
 
 const (
@@ -126,8 +127,9 @@ var tokens = []string{
 
 	INCLUDE: "INCLUDE",
 
-	IF: "IF",
-	DO: "DO",
+	IF:  "IF",
+	DO:  "DO",
+	FOR: "FOR",
 }
 
 var precedence = map[int]int{

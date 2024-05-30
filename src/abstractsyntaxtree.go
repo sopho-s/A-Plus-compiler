@@ -118,12 +118,12 @@ func ConvertPostfix(postfixcode section) node {
 				nodestack.Push(currnode)
 			}
 		}
-		if !isinsection && (nodestack.Peek().token != IF && nodestack.Peek().token != DO) {
+		if !isinsection && (nodestack.Peek().token != IF && nodestack.Peek().token != DO && nodestack.Peek().token != FOR) {
 			tempnode := nodestack.Pop()
 			sectionnode.LinkNode(&tempnode)
 		} else {
 			currnode := nodestack.Pop()
-			if currnode.token == IF || currnode.token == DO {
+			if currnode.token == IF || currnode.token == DO || currnode.token == FOR {
 				sectionnodestack.Push(currnode)
 				var openbrac node
 				openbrac.token = OPENCBRACKET
@@ -150,7 +150,7 @@ func ConvertPostfix(postfixcode section) node {
 			if sectionnodestack.IsEmpty() {
 				tempnode := tempnodestack.Pop()
 				sectionnode.LinkNode(&tempnode)
-			} else if currnode.token != IF && currnode.token != DO {
+			} else if currnode.token != IF && currnode.token != DO && currnode.token != FOR {
 				tempnodestack.Push(currnode)
 			}
 		}

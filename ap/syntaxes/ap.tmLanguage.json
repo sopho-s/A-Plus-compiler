@@ -31,7 +31,7 @@
 		"keywords": {
 			"patterns": [{
 				"name": "keyword.control.ap",
-				"match": "\\b(if|while|for|return|exit)\\b"
+				"match": "\\b(if|while|for|return|exit|do)\\b"
 			},
 			{
 				"name": "keyword.identifier.ap",

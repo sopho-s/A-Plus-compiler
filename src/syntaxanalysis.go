@@ -95,7 +95,7 @@ func SeperateSections(nodes []node, JMPlabel *int, loopJMPlabel *int, bl *buildl
 		if index == len(nodes) {
 			break
 		}
-		if !isgettingsection && (nodes[index].token == IF || nodes[index].token == DO) {
+		if !isgettingsection && (nodes[index].token == IF || nodes[index].token == DO || nodes[index].token == FOR) {
 			isgettingsection = true
 			lastconditionindex = index
 			index++

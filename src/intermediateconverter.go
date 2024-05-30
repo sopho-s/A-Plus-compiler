@@ -64,6 +64,21 @@ func MakeIntermediate(AST *node, JMPlabel *int, currentsectloop int) (code, int)
 		*JMPlabel++
 		returncode.AddCode(tempcode)
 		return returncode, VOID
+	case FOR:
+		var body code
+		for index := range AST.size {
+			bodycode, _ := MakeIntermediate(AST.children[index], JMPlabel, AST.loopnum)
+			body.AddCode(bodycode)
+		}
+		var tempcode code
+		tempcode.AddStringCode(strconv.Itoa(AST.linenumber) + " LABEL loop" + strconv.Itoa(AST.loopnum))
+		tempcode.AddCode(*AST.conditionintcode)
+		tempcode.AddStringCode(strconv.Itoa(AST.linenumber) + " POP IR1\n" + strconv.Itoa(AST.linenumber) + " ICMP IR1 1\n" + strconv.Itoa(AST.linenumber) + " JNE loopend" + strconv.Itoa(AST.loopnum))
+		tempcode.AddCode(body)
+		tempcode.AddStringCode(strconv.Itoa(AST.linenumber) + " JMP loop" + strconv.Itoa(AST.loopnum) + "\n" + strconv.Itoa(AST.linenumber) + " LABEL loopend" + strconv.Itoa(AST.loopnum))
+		*JMPlabel++
+		returncode.AddCode(tempcode)
+		return returncode, VOID
 	case DO:
 		var body code
 		for index := range AST.size {

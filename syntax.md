@@ -110,6 +110,15 @@ do {
 }
 ```
 
+A for statement will continue until its conditions are false
+
+```
+int i = 10;
+for i > 0 {
+    i = i - 1;
+}
+```
+
 ## Functions
 
 ### Main function

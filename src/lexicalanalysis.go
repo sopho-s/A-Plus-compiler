@@ -223,6 +223,8 @@ func (l *lexer) Lex() (position, token, string) {
 					return startPos, DO, lit
 				case "break":
 					return startPos, BREAK, lit
+				case "for":
+					return startPos, FOR, lit
 				default:
 					return startPos, IDENT, lit
 				}
